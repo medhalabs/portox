@@ -25,4 +25,15 @@ CREATE TABLE IF NOT EXISTS journal_entries (
   created_at TIMESTAMP
 );
 
+-- Persistent broker connections (encrypted tokens stored server-side).
+-- NOTE: This is an additional table beyond the MVP "exact tables" to enable sellable broker sync.
+CREATE TABLE IF NOT EXISTS broker_connections (
+  id UUID,
+  user_id UUID,
+  broker VARCHAR,
+  encrypted_blob TEXT,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
+
 

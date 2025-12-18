@@ -113,11 +113,11 @@ export default function InsightsPage() {
                   <XAxis dataKey="short" stroke="#94a3b8" fontSize={12} />
                   <YAxis stroke="#94a3b8" fontSize={12} />
                   <Tooltip
-                    contentStyle={{ background: "#0b1220", border: "1px solid #1f2937", color: "#e2e8f0" }}
+                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0" }}
                     formatter={(value) => formatCurrency(Number(value))}
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.date || label}
                   />
-                  <Line type="monotone" dataKey="pnl" stroke="#6366f1" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="pnl" stroke="#ffbf1f" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -131,7 +131,7 @@ export default function InsightsPage() {
                   <XAxis dataKey="week" stroke="#94a3b8" fontSize={12} />
                   <YAxis stroke="#94a3b8" fontSize={12} />
                   <Tooltip
-                    contentStyle={{ background: "#0b1220", border: "1px solid #1f2937", color: "#e2e8f0" }}
+                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0" }}
                     formatter={(value) => formatCurrency(Number(value))}
                   />
                   <Bar dataKey="pnl" fill="#22c55e" />
@@ -148,11 +148,11 @@ export default function InsightsPage() {
                   <XAxis dataKey="short" stroke="#94a3b8" fontSize={12} />
                   <YAxis stroke="#94a3b8" fontSize={12} />
                   <Tooltip
-                    contentStyle={{ background: "#0b1220", border: "1px solid #1f2937", color: "#e2e8f0" }}
+                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0" }}
                     formatter={(value) => formatCurrency(Number(value))}
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.date || label}
                   />
-                  <Line type="monotone" dataKey="equity" stroke="#eab308" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="equity" stroke="#ffbf1f" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -173,7 +173,7 @@ export default function InsightsPage() {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+    <div className="rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
       <div className="text-sm font-semibold">{title}</div>
       <div className="mt-3">{children}</div>
     </div>
@@ -182,7 +182,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="h-64 rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+    <div className="h-64 rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
       <div className="text-sm font-semibold">{title}</div>
       <div className="mt-4 h-48">{children}</div>
     </div>
@@ -206,7 +206,7 @@ function BreakdownTable({
   rows: { key: string; pnl: number; matches: number; win_rate: number }[];
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+    <div className="rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
       <div className="text-sm font-semibold">{title}</div>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-left text-sm">

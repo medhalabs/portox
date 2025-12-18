@@ -17,6 +17,21 @@ All protected endpoints require:
 - `DELETE /trades/{trade_id}`
 - `POST /trades/import/csv` (multipart form field: `file`)
 
+## Broker import (read-only)
+
+- `GET /brokers` (supported brokers)
+- `GET /brokers/connections` (list saved connections; never returns tokens)
+- `POST /brokers/{broker}/connect` (save tokens encrypted at rest)
+- `DELETE /brokers/{broker}/disconnect`
+- `POST /brokers/{broker}/sync` (imports using saved connection)
+- `POST /brokers/{broker}/import`
+  - brokers: `zerodha`, `upstox`, `dhan`
+  - body:
+    - `access_token` (required)
+    - `api_key` (required only for `zerodha`)
+    - `client_id` (optional for `dhan`, depending on auth scheme)
+    - `from_date`, `to_date` (optional; server-side filters)
+
 ## Journal
 
 - `GET /journal`

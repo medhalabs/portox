@@ -28,11 +28,15 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-slate-800 bg-slate-900/30 p-6">
-      <h1 className="text-xl font-semibold">Create account</h1>
+    <div className="mx-auto max-w-md rounded-3xl border border-slate-800/70 bg-slate-950/35 p-7 shadow-card">
+      <div className="inline-flex items-center gap-2 rounded-full border border-brand-400/25 bg-brand-400/10 px-3 py-1 text-xs text-brand-100">
+        <span className="h-1.5 w-1.5 rounded-full bg-brand-400" />
+        Get started
+      </div>
+      <h1 className="mt-4 text-2xl font-semibold tracking-tight">Create account</h1>
       <p className="mt-1 text-sm text-slate-300">
         Already have an account?{" "}
-        <Link href="/login" className="text-indigo-300 hover:text-indigo-200">
+        <Link href="/login" className="text-brand-200 hover:text-brand-100">
           Login
         </Link>
       </p>
@@ -45,7 +49,7 @@ export default function RegisterPage() {
             onChange={(e) => setEmail(e.target.value)}
             type="email"
             required
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-400/40 focus:outline-none"
           />
         </label>
 
@@ -57,7 +61,7 @@ export default function RegisterPage() {
             type="password"
             minLength={8}
             required
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-400/40 focus:outline-none"
           />
         </label>
 
@@ -65,7 +69,7 @@ export default function RegisterPage() {
 
         <button
           disabled={loading}
-          className="w-full rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60"
+          className="w-full rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
         >
           {loading ? "Creating..." : "Create account"}
         </button>

@@ -243,7 +243,7 @@ function EditTradeModal({
             </button>
             <button
               disabled={saving}
-              className="rounded-lg bg-indigo-500 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60"
+              className="rounded-lg bg-brand-400 px-3 py-2 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
             >
               {saving ? "Saving..." : "Save changes"}
             </button>

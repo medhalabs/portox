@@ -7,4 +7,36 @@ body {
   height: 100%;
 }
 
+:root {
+  --bg: 0 0 0;
+  --card: 11 18 32;
+  --border: 30 41 59;
+  --text: 226 232 240;
+  --muted: 148 163 184;
+  --brand: 255 191 31;
+}
+
+/* Subtle dark UI polish */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(255, 191, 31, 0.25);
+}
+
+/* Scrollbar (WebKit) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.5);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 191, 31, 0.35);
+}
+
 

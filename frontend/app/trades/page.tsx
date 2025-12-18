@@ -21,7 +21,17 @@ export default function TradesPage() {
   const [toDate, setToDate] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [importSummary, setImportSummary] = useState<any>(null);
+  const [brokerSummary, setBrokerSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [connections, setConnections] = useState<any[]>([]);
+
+  // Broker import (BYO token in Phase 1)
+  const [broker, setBroker] = useState<"zerodha" | "upstox" | "dhan">("zerodha");
+  const [brokerApiKey, setBrokerApiKey] = useState("");
+  const [brokerAccessToken, setBrokerAccessToken] = useState("");
+  const [brokerClientId, setBrokerClientId] = useState("");
+  const [brokerFrom, setBrokerFrom] = useState("");
+  const [brokerTo, setBrokerTo] = useState("");
 
   useEffect(() => {
     if (!getToken()) router.push("/login");
@@ -42,6 +52,20 @@ export default function TradesPage() {
 
   useEffect(() => {
     reload();
+  }, []);
+
+  async function reloadConnections() {
+    try {
+      const c = await apiFetch<{ connections: any[] }>("/brokers/connections");
+      setConnections(c.connections || []);
+    } catch {
+      // ignore (e.g. missing encryption key)
+      setConnections([]);
+    }
+  }
+
+  useEffect(() => {
+    reloadConnections();
   }, []);
 
   async function onUploadCsv(file: File) {
@@ -69,6 +93,86 @@ export default function TradesPage() {
     }
   }
 
+  async function onBrokerImport() {
+    setError(null);
+    setBrokerSummary(null);
+    try {
+      const token = getToken();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+      const body: any = {
+        access_token: brokerAccessToken,
+        from_date: brokerFrom || null,
+        to_date: brokerTo || null
+      };
+      if (broker === "zerodha") body.api_key = brokerApiKey;
+      if (broker === "dhan") body.client_id = brokerClientId || null;
+
+      const res = await fetch(`${API_BASE_URL}/brokers/${broker}/import`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const summary = await res.json();
+      setBrokerSummary(summary);
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Broker import failed");
+    }
+  }
+
+  async function onSaveBrokerConnection() {
+    setError(null);
+    setBrokerSummary(null);
+    try {
+      const token = getToken();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+      const body: any = { access_token: brokerAccessToken };
+      if (broker === "zerodha") body.api_key = brokerApiKey;
+      if (broker === "dhan") body.client_id = brokerClientId || null;
+
+      const res = await fetch(`${API_BASE_URL}/brokers/${broker}/connect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      await reloadConnections();
+      setBrokerSummary({ saved: true, broker });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Save connection failed");
+    }
+  }
+
+  async function onSyncBroker() {
+    setError(null);
+    setBrokerSummary(null);
+    try {
+      const token = getToken();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+      const res = await fetch(`${API_BASE_URL}/brokers/${broker}/sync`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const summary = await res.json();
+      setBrokerSummary(summary);
+      await reload();
+      await reloadConnections();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Broker sync failed");
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -82,6 +186,119 @@ export default function TradesPage() {
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-1">
           <AddTrade onCreated={reload} />
+
+          <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+            <div className="text-sm font-semibold">Broker import (read-only)</div>
+            <div className="mt-1 text-xs text-slate-400">
+              Connect once (encrypted at rest) and sync without re-pasting tokens. No order placement.
+            </div>
+            <div className="mt-4 grid gap-3">
+              <label className="block">
+                <div className="text-xs font-medium text-slate-300">Broker</div>
+                <select
+                  value={broker}
+                  onChange={(e) => setBroker(e.target.value as any)}
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                >
+                  <option value="zerodha">Zerodha</option>
+                  <option value="upstox">Upstox</option>
+                  <option value="dhan">Dhan</option>
+                </select>
+              </label>
+
+              {broker === "zerodha" ? (
+                <label className="block">
+                  <div className="text-xs font-medium text-slate-300">Zerodha API key</div>
+                  <input
+                    value={brokerApiKey}
+                    onChange={(e) => setBrokerApiKey(e.target.value.trim())}
+                    className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                    placeholder="api_key"
+                  />
+                </label>
+              ) : null}
+
+              {broker === "dhan" ? (
+                <label className="block">
+                  <div className="text-xs font-medium text-slate-300">Dhan client id (optional)</div>
+                  <input
+                    value={brokerClientId}
+                    onChange={(e) => setBrokerClientId(e.target.value.trim())}
+                    className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                    placeholder="client_id"
+                  />
+                </label>
+              ) : null}
+
+              <label className="block">
+                <div className="text-xs font-medium text-slate-300">Access token</div>
+                <input
+                  value={brokerAccessToken}
+                  onChange={(e) => setBrokerAccessToken(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                  placeholder="paste broker access token"
+                />
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <div className="text-xs font-medium text-slate-300">From (optional)</div>
+                  <input
+                    value={brokerFrom}
+                    onChange={(e) => setBrokerFrom(e.target.value)}
+                    type="date"
+                    className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="block">
+                  <div className="text-xs font-medium text-slate-300">To (optional)</div>
+                  <input
+                    value={brokerTo}
+                    onChange={(e) => setBrokerTo(e.target.value)}
+                    type="date"
+                    className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                  />
+                </label>
+              </div>
+
+              <button
+                type="button"
+                onClick={onSaveBrokerConnection}
+                className="rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300"
+              >
+                Save connection
+              </button>
+
+              <button
+                type="button"
+                onClick={onSyncBroker}
+                className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-900"
+              >
+                Sync from saved connection
+              </button>
+
+              <div className="rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-300">
+                <div className="font-medium text-slate-200">Connected brokers</div>
+                <div className="mt-1">
+                  {connections.length === 0 ? (
+                    <span className="text-slate-400">None</span>
+                  ) : (
+                    connections.map((c) => (
+                      <div key={c.id}>
+                        {c.broker} • updated: {String(c.updated_at)}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {brokerSummary ? (
+                <pre className="max-h-56 overflow-auto rounded-lg border border-slate-800 bg-slate-950 p-2 text-xs text-slate-200">
+                  {JSON.stringify(brokerSummary, null, 2)}
+                </pre>
+              ) : null}
+            </div>
+          </div>
 
           <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
             <div className="text-sm font-semibold">Review filters</div>

@@ -43,8 +43,11 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
-      <div className="text-sm font-semibold">Add trade</div>
+    <div className="rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-semibold">Add trade</div>
+        <div className="text-xs text-slate-400">Manual entry</div>
+      </div>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <label className="block">
           <div className="text-xs font-medium text-slate-300">Symbol</div>
@@ -52,7 +55,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
             value={symbol}
             onChange={(e) => setSymbol(e.target.value.toUpperCase())}
             required
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
             placeholder="RELIANCE"
           />
         </label>
@@ -63,7 +66,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
             <select
               value={side}
               onChange={(e) => setSide(e.target.value as "BUY" | "SELL")}
-              className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
             >
               <option value="BUY">BUY</option>
               <option value="SELL">SELL</option>
@@ -78,7 +81,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
               type="number"
               min={1}
               required
-              className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
             />
           </label>
         </div>
@@ -93,7 +96,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
               min={0}
               step="0.01"
               required
-              className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
             />
           </label>
           <label className="block">
@@ -104,7 +107,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
               type="number"
               min={0}
               step="0.01"
-              className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
             />
           </label>
         </div>
@@ -116,7 +119,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
             onChange={(e) => setTradeTime(e.target.value)}
             type="datetime-local"
             required
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
           />
         </label>
 
@@ -124,7 +127,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
 
         <button
           disabled={loading}
-          className="w-full rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60"
+          className="w-full rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
         >
           {loading ? "Saving..." : "Add trade"}
         </button>
