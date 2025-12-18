@@ -1,0 +1,20 @@
+services:
+  # Optional later:
+  # - add Dockerfiles for frontend/backend
+  # - mount database/ for DuckDB persistence
+  #
+  # This file is intentionally minimal in Phase 1.
+  #
+  # backend:
+  #   build: ./backend
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./database:/app/database
+  #
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+
+

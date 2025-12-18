@@ -1,0 +1,19 @@
+### Python
+backend/.venv/
+__pycache__/
+*.pyc
+
+### Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/.turbo/
+
+### Local env files
+backend/.env
+frontend/.env.local
+
+### DuckDB
+database/*.duckdb
+database/*.wal
+
+
