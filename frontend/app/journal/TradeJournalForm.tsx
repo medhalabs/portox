@@ -38,8 +38,11 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
   }
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
-      <div className="text-sm font-semibold">Add journal entry</div>
+    <div className="rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-semibold">Add journal entry</div>
+        <div className="text-xs text-slate-400">Tag + notes</div>
+      </div>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <label className="block">
           <div className="text-xs font-medium text-slate-300">Trade</div>
@@ -47,7 +50,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
             value={tradeId}
             onChange={(e) => setTradeId(e.target.value)}
             required
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
           >
             <option value="" disabled>
               Select a trade
@@ -65,7 +68,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
           <input
             value={strategy}
             onChange={(e) => setStrategy(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
             placeholder="Breakout"
           />
         </label>
@@ -75,7 +78,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
           <input
             value={emotion}
             onChange={(e) => setEmotion(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
             placeholder="Calm / FOMO / Frustrated..."
           />
         </label>
@@ -86,7 +89,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={6}
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
             placeholder="What went well? What to improve next time?"
           />
         </label>
@@ -95,7 +98,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
 
         <button
           disabled={loading}
-          className="w-full rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60"
+          className="w-full rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
         >
           {loading ? "Saving..." : "Add entry"}
         </button>

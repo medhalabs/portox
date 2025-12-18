@@ -86,13 +86,13 @@ export function JournalEntryList({
                   </div>
                   <button
                     onClick={() => setEditing(x)}
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs hover:bg-slate-900"
+                    className="rounded-lg border border-slate-800 bg-black/30 px-3 py-1.5 text-xs text-slate-200 hover:border-brand-400/25 hover:bg-slate-900/40 hover:text-white"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => onDelete(x.id)}
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs hover:bg-slate-900"
+                    className="rounded-lg border border-slate-800 bg-black/30 px-3 py-1.5 text-xs text-slate-200 hover:border-rose-500/30 hover:bg-rose-950/30 hover:text-white"
                   >
                     Delete
                   </button>
@@ -191,7 +191,7 @@ function EditJournalModal({
             </button>
             <button
               disabled={saving}
-              className="rounded-lg bg-indigo-500 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60"
+              className="rounded-lg bg-brand-400 px-3 py-2 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
             >
               {saving ? "Saving..." : "Save changes"}
             </button>

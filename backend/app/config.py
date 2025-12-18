@@ -26,6 +26,27 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
 
+    # Broker sync (read-only import). These are best-effort defaults and can be overridden.
+    zerodha_base_url: str = "https://api.kite.trade"
+    zerodha_trades_path: str = "/trades"
+
+    upstox_base_url: str = "https://api.upstox.com/v2"
+    upstox_trades_path: str = "/trade/history"
+
+    dhan_base_url: str = "https://api.dhan.co"
+    dhan_trades_path: str = "/trades"
+    dhan_auth_scheme: str = "Bearer"  # or "access-token"
+
+    # Used to encrypt broker tokens at rest in DuckDB.
+    # Generate: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    broker_token_encryption_key: str | None = None
+
+    @property
+    def resolved_broker_encryption_key(self) -> str:
+        if self.broker_token_encryption_key and self.broker_token_encryption_key.strip():
+            return self.broker_token_encryption_key.strip()
+        raise RuntimeError("BROKER_TOKEN_ENCRYPTION_KEY is required to use persistent broker connections.")
+
     @property
     def repo_root(self) -> Path:
         # backend/app/config.py -> backend/app -> backend -> repo_root
