@@ -5,7 +5,18 @@ from datetime import date
 from typing import Any, Dict, List
 
 from app.services.pnl_service import TradeRow, compute_fifo, compute_unrealized
-from app.utils.calculations import EquityPoint, bucket_hour, bucket_weekday, max_drawdown
+from app.utils.calculations import (
+    EquityPoint,
+    bucket_hour,
+    bucket_weekday,
+    max_drawdown,
+    sharpe_ratio,
+    sortino_ratio,
+    calmar_ratio,
+    profit_factor,
+    expectancy,
+    average_holding_period,
+)
 
 
 def _normalize_marks(marks: Dict[str, float] | None) -> Dict[str, float]:
@@ -36,14 +47,35 @@ def overview_from_trades(trades: List[TradeRow], marks: Dict[str, float] | None 
     avg_loss = float(sum(losses) / max(1, len(losses)))  # negative or 0
     risk_reward = float(avg_win / abs(avg_loss)) if avg_loss < 0 else None
 
-    # Equity curve based on realized exits
+    # Sort realized matches by exit time (needed for equity curve and advanced metrics)
     realized_sorted = sorted(realized, key=lambda m: m.exit_time)
+    
+    # Equity curve based on realized exits
     equity_points: List[EquityPoint] = []
     cum = 0.0
     for m in realized_sorted:
         cum += float(m.pnl)
         equity_points.append(EquityPoint(t=m.exit_time, equity=cum))
     drawdown = float(max_drawdown(equity_points)) if equity_points else 0.0
+
+    # Advanced risk metrics
+    gross_profit = float(sum(wins)) if wins else 0.0
+    gross_loss = float(sum(losses)) if losses else 0.0
+    profit_factor_val = profit_factor(gross_profit, gross_loss)
+    expectancy_val = expectancy(wins, losses, win_rate)
+
+    # Calculate daily returns for Sharpe/Sortino (using realized matches by exit date)
+    daily_returns: List[float] = []
+    holding_periods: List[float] = []
+    
+    for m in realized_sorted:
+        daily_returns.append(float(m.pnl))
+        holding_periods.append((m.exit_time - m.entry_time).total_seconds() / 86400.0)
+
+    sharpe = sharpe_ratio(daily_returns) if daily_returns else None
+    sortino = sortino_ratio(daily_returns) if daily_returns else None
+    calmar = calmar_ratio(realized_pnl, drawdown) if drawdown > 0 else None
+    avg_holding_period_days = float(sum(holding_periods) / len(holding_periods)) if holding_periods else None
 
     # Time buckets (exit time)
     pnl_by_hour: Dict[int, float] = defaultdict(float)
@@ -101,6 +133,14 @@ def overview_from_trades(trades: List[TradeRow], marks: Dict[str, float] | None 
         "avg_loss": avg_loss,
         "drawdown": drawdown,
         "risk_reward_ratio": risk_reward,
+        "advanced_metrics": {
+            "sharpe_ratio": float(sharpe) if sharpe is not None else None,
+            "sortino_ratio": float(sortino) if sortino is not None else None,
+            "calmar_ratio": float(calmar) if calmar is not None else None,
+            "profit_factor": float(profit_factor_val) if profit_factor_val is not None else None,
+            "expectancy": float(expectancy_val) if expectancy_val is not None else None,
+            "avg_holding_period_days": float(avg_holding_period_days) if avg_holding_period_days is not None else None,
+        },
         "time_buckets": {
             "pnl_by_hour": {int(k): float(v) for k, v in sorted(pnl_by_hour.items())},
             "pnl_by_weekday": {int(k): float(v) for k, v in sorted(pnl_by_weekday.items())},

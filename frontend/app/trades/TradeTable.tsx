@@ -1,6 +1,6 @@
 "use client";
 
-import { apiDelete, apiPut } from "@/lib/api";
+import { apiDelete, apiPost, apiPut } from "@/lib/api";
 import type { Trade } from "@/types/trade";
 import { formatDateTime } from "@/utils/formatters";
 import { useMemo, useState } from "react";
@@ -24,6 +24,18 @@ export function TradeTable({ trades, onChanged }: { trades: Trade[]; onChanged: 
       trade_time: next.trade_time
     });
     setEditing(null);
+    onChanged();
+  }
+
+  async function onDuplicate(trade: Trade) {
+    await apiPost("/trades", {
+      symbol: trade.symbol,
+      side: trade.side,
+      quantity: trade.quantity,
+      price: trade.price,
+      fees: trade.fees,
+      trade_time: new Date().toISOString(), // Current time for duplicate
+    });
     onChanged();
   }
 
@@ -74,6 +86,13 @@ export function TradeTable({ trades, onChanged }: { trades: Trade[]; onChanged: 
                   <td className="py-2">{t.fees.toFixed(2)}</td>
                   <td className="py-2 text-right">
                     <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => onDuplicate(t)}
+                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs hover:bg-slate-900"
+                        title="Duplicate trade"
+                      >
+                        Duplicate
+                      </button>
                       <button
                         onClick={() => setEditing(t)}
                         className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs hover:bg-slate-900"

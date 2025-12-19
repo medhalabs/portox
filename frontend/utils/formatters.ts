@@ -1,7 +1,20 @@
+import { getCurrencySymbol, getSettings } from "@/lib/settings";
+
 export function formatCurrency(value: number) {
+  const settings = getSettings();
+  const currencySymbol = getCurrencySymbol(settings.currency);
   const sign = value < 0 ? "-" : "";
   const abs = Math.abs(value);
-  return `${sign}₹${abs.toFixed(2)}`;
+  
+  // Format based on currency (some currencies don't use decimals traditionally)
+  let formattedValue: string;
+  if (settings.currency === "JPY") {
+    formattedValue = abs.toFixed(0);
+  } else {
+    formattedValue = abs.toFixed(2);
+  }
+  
+  return `${sign}${currencySymbol}${formattedValue}`;
 }
 
 export function formatPercent(value: number) {

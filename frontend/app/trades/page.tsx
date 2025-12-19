@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { apiFetch } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { exportTradesCSV, exportTradesExcel } from "@/lib/export";
+import { getSettings } from "@/lib/settings";
 import type { Trade } from "@/types/trade";
 
 import { AddTrade } from "./AddTrade";
@@ -32,9 +34,24 @@ export default function TradesPage() {
   const [brokerClientId, setBrokerClientId] = useState("");
   const [brokerFrom, setBrokerFrom] = useState("");
   const [brokerTo, setBrokerTo] = useState("");
+  const [marketType, setMarketType] = useState<"indian_stocks" | "other_countries" | "forex" | "crypto">("indian_stocks");
 
   useEffect(() => {
     if (!getToken()) router.push("/login");
+    
+    // Load settings
+    const settings = getSettings();
+    setMarketType(settings.marketType);
+    
+    // Listen for settings changes
+    const handleSettingsChange = (e: CustomEvent) => {
+      setMarketType(e.detail.marketType);
+    };
+    window.addEventListener("settingsChanged", handleSettingsChange as EventListener);
+    
+    return () => {
+      window.removeEventListener("settingsChanged", handleSettingsChange as EventListener);
+    };
   }, [router]);
 
   async function reload() {
@@ -177,6 +194,22 @@ export default function TradesPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Trades</h1>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => exportTradesCSV().catch((err) => setError(err.message))}
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+          >
+            Export CSV
+          </button>
+          <button
+            type="button"
+            onClick={() => exportTradesExcel().catch((err) => setError(err.message))}
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+          >
+            Export Excel
+          </button>
+        </div>
       </div>
 
       {error ? (
@@ -187,6 +220,7 @@ export default function TradesPage() {
         <div className="lg:col-span-1">
           <AddTrade onCreated={reload} />
 
+          {marketType === "indian_stocks" && (
           <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
             <div className="text-sm font-semibold">Broker import (read-only)</div>
             <div className="mt-1 text-xs text-slate-400">
@@ -299,6 +333,7 @@ export default function TradesPage() {
               ) : null}
             </div>
           </div>
+          )}
 
           <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
             <div className="text-sm font-semibold">Review filters</div>
@@ -324,6 +359,58 @@ export default function TradesPage() {
                   <option value="SELL">SELL</option>
                 </select>
               </label>
+              <div className="mb-2">
+                <div className="text-xs font-medium text-slate-300 mb-2">Date Range Presets</div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const today = new Date();
+                      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+                      setFromDate(start.toISOString().split("T")[0]);
+                      setToDate(today.toISOString().split("T")[0]);
+                    }}
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs hover:bg-slate-900"
+                  >
+                    This Month
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const today = new Date();
+                      const start = new Date(today.getFullYear(), 0, 1);
+                      setFromDate(start.toISOString().split("T")[0]);
+                      setToDate(today.toISOString().split("T")[0]);
+                    }}
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs hover:bg-slate-900"
+                  >
+                    YTD
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const today = new Date();
+                      const last30 = new Date(today);
+                      last30.setDate(last30.getDate() - 30);
+                      setFromDate(last30.toISOString().split("T")[0]);
+                      setToDate(today.toISOString().split("T")[0]);
+                    }}
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs hover:bg-slate-900"
+                  >
+                    Last 30 Days
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFromDate("");
+                      setToDate("");
+                    }}
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs hover:bg-slate-900"
+                  >
+                    All Time
+                  </button>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
                   <div className="text-xs font-medium text-slate-300">From</div>
