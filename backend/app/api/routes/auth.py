@@ -20,6 +20,14 @@ def register(payload: RegisterRequest) -> UserPublic:
     if existing:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
+    # bcrypt has a 72-byte limit for passwords
+    password_bytes = payload.password.encode("utf-8")
+    if len(password_bytes) > 72:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password is too long. Maximum 72 bytes allowed.",
+        )
+
     user_id = str(uuid4())
     password_hash = pwd_context.hash(payload.password)
     created_at = datetime.now(timezone.utc)
