@@ -59,6 +59,7 @@ export function TopNav() {
         <>
           <NavLink href="/dashboard">Dashboard</NavLink>
           <NavLink href="/insights">Insights</NavLink>
+          <NavLink href="/analysis">Analysis</NavLink>
           <NavLink href="/trades">Trades</NavLink>
           <NavLink href="/journal">Journal</NavLink>
           <NavLink href="/tax">Tax</NavLink>

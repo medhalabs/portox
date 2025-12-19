@@ -45,8 +45,21 @@ export function JournalEntryList({
     onChanged();
   }
 
-  async function onSave(next: { id: string; strategy: string | null; emotion: string | null; notes: string | null }) {
-    await apiPut(`/journal/${next.id}`, { strategy: next.strategy, emotion: next.emotion, notes: next.notes });
+  async function onSave(next: {
+    id: string;
+    strategy: string | null;
+    emotion: string | null;
+    notes: string | null;
+    entry_rationale: string | null;
+    exit_rationale: string | null;
+  }) {
+    await apiPut(`/journal/${next.id}`, {
+      strategy: next.strategy,
+      emotion: next.emotion,
+      notes: next.notes,
+      entry_rationale: next.entry_rationale,
+      exit_rationale: next.exit_rationale,
+    });
     setEditing(null);
     onChanged();
   }
@@ -98,7 +111,24 @@ export function JournalEntryList({
                   </button>
                 </div>
               </div>
-              {x.notes ? <div className="mt-2 whitespace-pre-wrap text-sm text-slate-200">{x.notes}</div> : null}
+              {x.entry_rationale ? (
+                <div className="mt-2">
+                  <div className="text-xs font-medium text-slate-400">Entry Rationale</div>
+                  <div className="whitespace-pre-wrap text-sm text-slate-200">{x.entry_rationale}</div>
+                </div>
+              ) : null}
+              {x.exit_rationale ? (
+                <div className="mt-2">
+                  <div className="text-xs font-medium text-slate-400">Exit Rationale</div>
+                  <div className="whitespace-pre-wrap text-sm text-slate-200">{x.exit_rationale}</div>
+                </div>
+              ) : null}
+              {x.notes ? (
+                <div className="mt-2">
+                  <div className="text-xs font-medium text-slate-400">Notes</div>
+                  <div className="whitespace-pre-wrap text-sm text-slate-200">{x.notes}</div>
+                </div>
+              ) : null}
             </div>
           );
         })
@@ -116,11 +146,20 @@ function EditJournalModal({
 }: {
   entry: JournalEntry;
   onClose: () => void;
-  onSave: (next: { id: string; strategy: string | null; emotion: string | null; notes: string | null }) => void;
+  onSave: (next: {
+    id: string;
+    strategy: string | null;
+    emotion: string | null;
+    notes: string | null;
+    entry_rationale: string | null;
+    exit_rationale: string | null;
+  }) => void;
 }) {
   const [strategy, setStrategy] = useState(entry.strategy || "");
   const [emotion, setEmotion] = useState(entry.emotion || "");
   const [notes, setNotes] = useState(entry.notes || "");
+  const [entryRationale, setEntryRationale] = useState(entry.entry_rationale || "");
+  const [exitRationale, setExitRationale] = useState(entry.exit_rationale || "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -133,7 +172,9 @@ function EditJournalModal({
         id: entry.id,
         strategy: strategy.trim() ? strategy.trim() : null,
         emotion: emotion.trim() ? emotion.trim() : null,
-        notes: notes.trim() ? notes : null
+        notes: notes.trim() ? notes : null,
+        entry_rationale: entryRationale.trim() ? entryRationale : null,
+        exit_rationale: exitRationale.trim() ? exitRationale : null,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update entry");
@@ -170,11 +211,31 @@ function EditJournalModal({
             />
           </label>
           <label className="block">
+            <div className="text-xs font-medium text-slate-300">Entry Rationale</div>
+            <textarea
+              value={entryRationale}
+              onChange={(e) => setEntryRationale(e.target.value)}
+              rows={3}
+              className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm"
+              placeholder="Why did you enter this trade?"
+            />
+          </label>
+          <label className="block">
+            <div className="text-xs font-medium text-slate-300">Exit Rationale</div>
+            <textarea
+              value={exitRationale}
+              onChange={(e) => setExitRationale(e.target.value)}
+              rows={3}
+              className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm"
+              placeholder="Why did you exit this trade?"
+            />
+          </label>
+          <label className="block">
             <div className="text-xs font-medium text-slate-300">Notes</div>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              rows={7}
+              rows={5}
               className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm"
             />
           </label>

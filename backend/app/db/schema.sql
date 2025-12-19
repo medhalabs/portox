@@ -22,6 +22,21 @@ CREATE TABLE IF NOT EXISTS journal_entries (
   strategy VARCHAR,
   emotion VARCHAR,
   notes TEXT,
+  entry_rationale TEXT,
+  exit_rationale TEXT,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
+
+-- Journal attachments (images, voice notes, etc.)
+CREATE TABLE IF NOT EXISTS journal_attachments (
+  id UUID,
+  journal_entry_id UUID,
+  file_type VARCHAR,  -- 'image', 'audio', 'document'
+  file_path VARCHAR,
+  file_name VARCHAR,
+  file_size INTEGER,
+  mime_type VARCHAR,
   created_at TIMESTAMP
 );
 

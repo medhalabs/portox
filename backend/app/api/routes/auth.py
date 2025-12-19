@@ -3,9 +3,10 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from passlib.context import CryptContext
 
+from app.auth.dependencies import get_current_user
 from app.auth.jwt import create_access_token
 from app.db.duckdb import execute, fetch_one
 from app.models.user import LoginRequest, RegisterRequest, TokenResponse, UserPublic
@@ -36,6 +37,15 @@ def register(payload: RegisterRequest) -> UserPublic:
         [user_id, payload.email, password_hash, created_at],
     )
     return UserPublic(id=user_id, email=payload.email, created_at=created_at)
+
+
+@router.get("/me", response_model=UserPublic)
+def get_current_user_info(user: dict = Depends(get_current_user)) -> UserPublic:
+    """Get current user information"""
+    row = fetch_one("SELECT id, email, created_at FROM users WHERE id = ?", [user["id"]])
+    if not row:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return UserPublic(**row)  # type: ignore[arg-type]
 
 
 @router.post("/login", response_model=TokenResponse)

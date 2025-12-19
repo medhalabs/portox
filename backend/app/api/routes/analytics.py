@@ -7,6 +7,13 @@ from app.auth.dependencies import get_current_user
 from app.db.duckdb import fetch_all
 from app.models.analytics import OverviewRequest
 from app.services.analytics_service import overview_from_trades, performance_from_trades, realized_matches
+from app.services.trade_analysis_service import (
+    calculate_trade_heatmap,
+    calculate_time_of_day_analysis,
+    calculate_symbol_performance_matrix,
+    calculate_strategy_comparison_matrix,
+    calculate_win_loss_distribution,
+)
 from app.services.export_service import export_analytics_csv, export_realized_matches_csv
 from app.services.pdf_service import generate_performance_report
 from app.services.pnl_service import TradeRow, compute_fifo
@@ -133,6 +140,42 @@ def tax_years_summary(user: dict = Depends(get_current_user)) -> dict:
     trades = _load_trades(str(user["id"]))
     realized, _, _ = compute_fifo(trades)
     return {"by_year": get_tax_year_summary(realized)}
+
+
+@router.get("/trade-heatmap")
+def trade_heatmap(user: dict = Depends(get_current_user)) -> dict:
+    """Get trade heatmap data (calendar view of P&L)"""
+    trades = _load_trades(str(user["id"]))
+    return calculate_trade_heatmap(trades)
+
+
+@router.get("/time-of-day")
+def time_of_day_analysis(user: dict = Depends(get_current_user)) -> dict:
+    """Get time-of-day analysis (P&L by hour)"""
+    trades = _load_trades(str(user["id"]))
+    return calculate_time_of_day_analysis(trades)
+
+
+@router.get("/symbol-matrix")
+def symbol_performance_matrix(user: dict = Depends(get_current_user)) -> dict:
+    """Get symbol performance matrix"""
+    trades = _load_trades(str(user["id"]))
+    return calculate_symbol_performance_matrix(trades)
+
+
+@router.get("/strategy-matrix")
+def strategy_comparison_matrix(user: dict = Depends(get_current_user)) -> dict:
+    """Get strategy comparison matrix"""
+    trades = _load_trades(str(user["id"]))
+    tags = _load_journal_tags(str(user["id"]))
+    return calculate_strategy_comparison_matrix(trades, journal_by_trade_id=tags)
+
+
+@router.get("/win-loss-distribution")
+def win_loss_distribution(user: dict = Depends(get_current_user)) -> dict:
+    """Get win/loss distribution histogram data"""
+    trades = _load_trades(str(user["id"]))
+    return calculate_win_loss_distribution(trades)
 
 
 @router.post("/tax/{tax_year}")

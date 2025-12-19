@@ -25,7 +25,7 @@ def _ensure_trade_belongs_to_user(trade_id: str, user_id: str) -> None:
 def list_entries(user: dict = Depends(get_current_user)) -> List[JournalEntry]:
     rows = fetch_all(
         """
-        SELECT je.id, je.trade_id, je.strategy, je.emotion, je.notes, je.created_at
+        SELECT je.id, je.trade_id, je.strategy, je.emotion, je.notes, je.entry_rationale, je.exit_rationale, je.created_at, je.updated_at
         FROM journal_entries je
         JOIN trades t ON t.id = je.trade_id
         WHERE t.user_id = ?
@@ -43,11 +43,21 @@ def create_entry(payload: JournalEntryCreate, user: dict = Depends(get_current_u
     entry_id = str(uuid4())
     created_at = datetime.now(timezone.utc)
     execute(
-        "INSERT INTO journal_entries (id, trade_id, strategy, emotion, notes, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        [entry_id, payload.trade_id, payload.strategy, payload.emotion, payload.notes, created_at],
+        "INSERT INTO journal_entries (id, trade_id, strategy, emotion, notes, entry_rationale, exit_rationale, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+            entry_id,
+            payload.trade_id,
+            payload.strategy,
+            payload.emotion,
+            payload.notes,
+            payload.entry_rationale,
+            payload.exit_rationale,
+            created_at,
+            created_at,
+        ],
     )
     row = fetch_one(
-        "SELECT id, trade_id, strategy, emotion, notes, created_at FROM journal_entries WHERE id = ?",
+        "SELECT id, trade_id, strategy, emotion, notes, entry_rationale, exit_rationale, created_at, updated_at FROM journal_entries WHERE id = ?",
         [entry_id],
     )
     return JournalEntry(**row)  # type: ignore[arg-type]
@@ -71,11 +81,12 @@ def update_entry(entry_id: str, payload: JournalEntryUpdate, user: dict = Depend
     fields = payload.model_dump(exclude_unset=True)
     if fields:
         sets = ", ".join([f"{k} = ?" for k in fields.keys()])
-        params = list(fields.values()) + [entry_id]
+        sets += ", updated_at = ?" if sets else "updated_at = ?"
+        params = list(fields.values()) + [datetime.now(timezone.utc), entry_id]
         execute(f"UPDATE journal_entries SET {sets} WHERE id = ?", params)
 
     row = fetch_one(
-        "SELECT id, trade_id, strategy, emotion, notes, created_at FROM journal_entries WHERE id = ?",
+        "SELECT id, trade_id, strategy, emotion, notes, entry_rationale, exit_rationale, created_at, updated_at FROM journal_entries WHERE id = ?",
         [entry_id],
     )
     return JournalEntry(**row)  # type: ignore[arg-type]
