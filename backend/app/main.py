@@ -93,7 +93,7 @@ def _startup() -> None:
 
 @app.get("/")
 def root() -> dict:
-    return {"name": "portik", "vendor": VENDOR, "disclaimer": DISCLAIMER}
+    return {"name": "portik", "vendor": VENDOR, "disclaimer": DISCLAIMER, "version": "0.1.0"}
 
 
 app.include_router(auth_router)
