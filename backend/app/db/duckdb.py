@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Sequence
@@ -12,7 +13,16 @@ from app.config import settings
 
 
 def _ensure_parent_dir(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    """Ensure parent directory exists, handling permission errors gracefully."""
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        # If we can't create the directory, try to use it if it exists
+        if not path.parent.exists():
+            raise
+        # If it exists but we can't write, that's a different issue
+        if not os.access(path.parent, os.W_OK):
+            raise
 
 
 @contextmanager

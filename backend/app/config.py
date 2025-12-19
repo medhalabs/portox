@@ -55,7 +55,21 @@ class Settings(BaseSettings):
     @property
     def resolved_duckdb_path(self) -> Path:
         if self.duckdb_path:
-            return Path(self.duckdb_path).expanduser().resolve()
+            path = Path(self.duckdb_path).expanduser().resolve()
+            # If the path is /data and it doesn't exist or isn't writable, fall back
+            if str(path).startswith("/data"):
+                if not path.parent.exists():
+                    # /data doesn't exist, fall back to project directory
+                    return (self.repo_root / "database" / "trading_data.duckdb").resolve()
+                # Check if we can write to the parent directory
+                try:
+                    if not os.access(path.parent, os.W_OK):
+                        # Can't write to /data, fall back
+                        return (self.repo_root / "database" / "trading_data.duckdb").resolve()
+                except Exception:
+                    # Error checking access, fall back
+                    return (self.repo_root / "database" / "trading_data.duckdb").resolve()
+            return path
         return (self.repo_root / "database" / "trading_data.duckdb").resolve()
 
     @property
