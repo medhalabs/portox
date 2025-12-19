@@ -39,4 +39,82 @@ body {
   background: rgba(255, 191, 31, 0.35);
 }
 
+/* Print styles */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  
+  /* Hide navigation and non-essential elements */
+  nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure charts and tables print well */
+  .rounded-2xl,
+  .rounded-3xl,
+  .rounded-xl {
+    border: 1px solid #000;
+    page-break-inside: avoid;
+  }
+  
+  /* Optimize spacing for print */
+  .space-y-5 > * + * {
+    margin-top: 1rem;
+  }
+  
+  /* Remove background colors for better printing */
+  .bg-slate-900,
+  .bg-slate-950,
+  .bg-black {
+    background: white !important;
+    color: black !important;
+  }
+  
+  /* Ensure text is readable */
+  .text-slate-100,
+  .text-slate-200,
+  .text-slate-300,
+  .text-slate-400 {
+    color: black !important;
+  }
+  
+  /* Charts should fit on page */
+  .h-48,
+  .h-64,
+  .h-96 {
+    height: auto !important;
+    max-height: 400px;
+  }
+  
+  /* Table borders for clarity */
+  table {
+    border-collapse: collapse;
+  }
+  
+  th,
+  td {
+    border: 1px solid #000;
+    padding: 0.5rem;
+  }
+  
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+  
+  .page-break-after {
+    page-break-after: always;
+  }
+  
+  /* Avoid breaking inside cards */
+  .rounded-2xl,
+  .rounded-3xl {
+    page-break-inside: avoid;
+  }
+}
+
 

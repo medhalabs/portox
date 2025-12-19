@@ -37,23 +37,12 @@ def get_conn() -> Iterator[duckdb.DuckDBPyConnection]:
 
 
 def init_db() -> None:
-    """Initialize database schema if tables don't exist."""
+    """Initialize database schema. Tables use IF NOT EXISTS so this is safe to run multiple times."""
     schema_path = Path(__file__).resolve().parent / "schema.sql"
     schema_sql = schema_path.read_text(encoding="utf-8")
     with get_conn() as conn:
-        # Check if users table exists (indicates DB is initialized)
-        try:
-            result = conn.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
-            ).fetchone()
-            if result:
-                # Database already initialized, skip
-                return
-        except Exception:
-            # Table doesn't exist or error, proceed with initialization
-            pass
-
-        # Initialize schema (uses IF NOT EXISTS, so safe to run)
+        # Execute schema (uses IF NOT EXISTS, so safe to run multiple times)
+        # This allows new tables to be added to schema.sql and created on startup
         conn.execute(schema_sql)
 
 

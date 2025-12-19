@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { apiFetch } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { exportPerformancePDF } from "@/lib/export";
 import type { AnalyticsOverview, PortfolioSummary } from "@/types/portfolio";
 
 import { PortfolioSummaryCard } from "./components/PortfolioSummary";
@@ -54,6 +55,13 @@ export default function DashboardPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <button
+          type="button"
+          onClick={() => exportPerformancePDF().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
+          className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+        >
+          Export PDF Report
+        </button>
       </div>
 
       {error ? (

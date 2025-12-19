@@ -36,4 +36,33 @@ CREATE TABLE IF NOT EXISTS broker_connections (
   updated_at TIMESTAMP
 );
 
+-- Notification preferences for users
+CREATE TABLE IF NOT EXISTS notification_preferences (
+  id UUID,
+  user_id UUID,
+  daily_summary_enabled BOOLEAN DEFAULT false,
+  daily_summary_time TIME DEFAULT '20:00:00',
+  journal_reminder_enabled BOOLEAN DEFAULT false,
+  journal_reminder_hours INTEGER DEFAULT 24,  -- Remind if trade not journaled within N hours
+  milestone_alerts_enabled BOOLEAN DEFAULT false,
+  milestone_thresholds JSON,  -- e.g., {"total_pnl": [1000, 5000, 10000], "win_streak": [5, 10]}
+  position_alerts_enabled BOOLEAN DEFAULT false,
+  unrealized_pnl_threshold DOUBLE DEFAULT 0,  -- Alert if unrealized P&L exceeds this (absolute value)
+  email_enabled BOOLEAN DEFAULT false,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
+
+-- In-app notifications
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID,
+  user_id UUID,
+  type VARCHAR,  -- 'milestone', 'position_alert', 'journal_reminder', 'info'
+  title VARCHAR,
+  message TEXT,
+  read BOOLEAN DEFAULT false,
+  metadata JSON,  -- Additional data like symbol, threshold, etc.
+  created_at TIMESTAMP
+);
+
 

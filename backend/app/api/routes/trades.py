@@ -4,11 +4,13 @@ from typing import List
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi.responses import StreamingResponse
 
 from app.auth.dependencies import get_current_user
 from app.db.duckdb import execute, fetch_all, fetch_one
 from app.models.trade import Trade, TradeCreate, TradeUpdate
 from app.services.csv_importer import import_trades_csv
+from app.services.export_service import export_trades_csv, export_trades_excel
 
 router = APIRouter(prefix="/trades", tags=["trades"])
 
@@ -99,5 +101,69 @@ async def import_csv(file: UploadFile = File(...), user: dict = Depends(get_curr
         return import_trades_csv(user_id=str(user["id"]), file_bytes=content)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get("/export/csv")
+def export_csv(user: dict = Depends(get_current_user)) -> StreamingResponse:
+    """Export all trades to CSV"""
+    rows = fetch_all(
+        """
+        SELECT id, symbol, side, quantity, price, trade_time, fees
+        FROM trades
+        WHERE user_id = ?
+        ORDER BY trade_time DESC
+        """.strip(),
+        [user["id"]],
+    )
+    trades = [dict(r) for r in rows]
+    csv_data = export_trades_csv(trades)
+    return StreamingResponse(
+        iter([csv_data]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=trades_export.csv"},
+    )
+
+
+@router.get("/export/excel")
+def export_excel(user: dict = Depends(get_current_user)) -> StreamingResponse:
+    """Export trades to Excel with journal data"""
+    rows = fetch_all(
+        """
+        SELECT id, symbol, side, quantity, price, trade_time, fees
+        FROM trades
+        WHERE user_id = ?
+        ORDER BY trade_time DESC
+        """.strip(),
+        [user["id"]],
+    )
+    trades = [dict(r) for r in rows]
+    
+    # Load journal tags
+    journal_rows = fetch_all(
+        """
+        SELECT je.trade_id, je.strategy, je.emotion, je.notes, je.created_at
+        FROM journal_entries je
+        JOIN trades t ON t.id = je.trade_id
+        WHERE t.user_id = ?
+        ORDER BY je.created_at DESC
+        """.strip(),
+        [user["id"]],
+    )
+    journal_tags: dict = {}
+    for r in journal_rows:
+        tid = str(r["trade_id"])
+        if tid not in journal_tags:
+            journal_tags[tid] = {
+                "strategy": r.get("strategy"),
+                "emotion": r.get("emotion"),
+                "notes": r.get("notes"),
+            }
+    
+    excel_data = export_trades_excel(trades, journal_by_trade_id=journal_tags)
+    return StreamingResponse(
+        iter([excel_data]),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=trades_export.xlsx"},
+    )
 
 

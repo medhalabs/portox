@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { apiFetch } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { exportJournalCSV } from "@/lib/export";
 import type { JournalEntry } from "@/types/journal";
 import type { Trade } from "@/types/trade";
 import { formatDateTime } from "@/utils/formatters";
@@ -48,6 +49,13 @@ export default function JournalPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Journal</h1>
+        <button
+          type="button"
+          onClick={() => exportJournalCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
+          className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+        >
+          Export CSV
+        </button>
       </div>
 
       {error ? (

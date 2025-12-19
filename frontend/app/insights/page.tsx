@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { apiFetch } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { exportAnalyticsCSV, exportRealizedMatchesCSV } from "@/lib/export";
 import type { PerformanceResponse } from "@/types/analytics";
 import { formatCurrency, formatPercent } from "@/utils/formatters";
 import {
@@ -65,6 +66,22 @@ export default function InsightsPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Insights</h1>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => exportAnalyticsCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+          >
+            Export Analytics CSV
+          </button>
+          <button
+            type="button"
+            onClick={() => exportRealizedMatchesCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+          >
+            Export Matches CSV
+          </button>
+        </div>
       </div>
 
       {error ? (

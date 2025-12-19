@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { clearToken, getToken } from "@/lib/auth";
+import { NotificationBell } from "./NotificationBell";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -60,8 +61,12 @@ export function TopNav() {
           <NavLink href="/insights">Insights</NavLink>
           <NavLink href="/trades">Trades</NavLink>
           <NavLink href="/journal">Journal</NavLink>
+          <NavLink href="/tax">Tax</NavLink>
+          <NavLink href="/settings">Settings</NavLink>
 
           <span className="mx-1 hidden h-4 w-px bg-slate-800 md:block" />
+
+          <NotificationBell />
 
           <button
             onClick={logout}

@@ -5,10 +5,12 @@ from typing import List
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi.responses import StreamingResponse
 
 from app.auth.dependencies import get_current_user
 from app.db.duckdb import execute, fetch_all, fetch_one
 from app.models.journal import JournalEntry, JournalEntryCreate, JournalEntryUpdate
+from app.services.export_service import export_journal_csv
 
 router = APIRouter(prefix="/journal", tags=["journal"])
 
@@ -94,5 +96,27 @@ def delete_entry(entry_id: str, user: dict = Depends(get_current_user)) -> Respo
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Journal entry not found")
     execute("DELETE FROM journal_entries WHERE id = ?", [entry_id])
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/export/csv")
+def export_csv(user: dict = Depends(get_current_user)) -> StreamingResponse:
+    """Export all journal entries to CSV"""
+    rows = fetch_all(
+        """
+        SELECT je.id, je.trade_id, je.strategy, je.emotion, je.notes, je.created_at
+        FROM journal_entries je
+        JOIN trades t ON t.id = je.trade_id
+        WHERE t.user_id = ?
+        ORDER BY je.created_at DESC
+        """.strip(),
+        [user["id"]],
+    )
+    entries = [dict(r) for r in rows]
+    csv_data = export_journal_csv(entries)
+    return StreamingResponse(
+        iter([csv_data]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=journal_export.csv"},
+    )
 
 

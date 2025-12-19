@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { apiPost } from "@/lib/api";
+import { applyTemplate, getTemplates, saveTemplate, type TradeTemplate } from "@/lib/trade_templates";
 
 export function AddTrade({ onCreated }: { onCreated: () => void }) {
   const [symbol, setSymbol] = useState("");
@@ -17,6 +18,13 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [templates, setTemplates] = useState<TradeTemplate[]>([]);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+
+  useEffect(() => {
+    setTemplates(getTemplates());
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,6 +42,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
       setSymbol("");
       setPrice(0);
       setFees(0);
+      setQuantity(1);
       onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create trade");
@@ -125,12 +134,80 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
 
         {error ? <div className="rounded-lg border border-rose-900 bg-rose-950/40 p-2 text-xs">{error}</div> : null}
 
-        <button
-          disabled={loading}
-          className="w-full rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
-        >
-          {loading ? "Saving..." : "Add trade"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            disabled={loading}
+            type="submit"
+            className="flex-1 rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
+          >
+            {loading ? "Saving..." : "Add trade"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowSaveTemplate(!showSaveTemplate)}
+            className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+          >
+            Save Template
+          </button>
+        </div>
+
+        {showSaveTemplate && (
+          <div className="mt-2 rounded-lg border border-slate-800 bg-slate-950 p-3">
+            <input
+              type="text"
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              placeholder="Template name"
+              className="mb-2 w-full rounded-lg border border-slate-700 bg-black px-2 py-1 text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (templateName && symbol) {
+                  saveTemplate({
+                    name: templateName,
+                    symbol,
+                    side,
+                    quantity,
+                    price: price || undefined,
+                    fees: fees || undefined,
+                  });
+                  setTemplates(getTemplates());
+                  setTemplateName("");
+                  setShowSaveTemplate(false);
+                }
+              }}
+              className="w-full rounded-lg bg-slate-800 px-3 py-1.5 text-sm hover:bg-slate-700"
+            >
+              Save
+            </button>
+          </div>
+        )}
+
+        {templates.length > 0 && (
+          <div className="mt-3">
+            <div className="mb-2 text-xs font-medium text-slate-400">Templates:</div>
+            <div className="flex flex-wrap gap-2">
+              {templates.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    const applied = applyTemplate(t);
+                    setSymbol(applied.symbol);
+                    setSide(applied.side);
+                    setQuantity(applied.quantity);
+                    setPrice(applied.price);
+                    setFees(applied.fees);
+                  }}
+                  className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs hover:bg-slate-900"
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );

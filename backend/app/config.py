@@ -41,6 +41,15 @@ class Settings(BaseSettings):
     # Generate: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
     broker_token_encryption_key: str | None = None
 
+    # Email configuration for notifications
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_from_email: str | None = None
+    smtp_from_name: str = "portik"
+    smtp_use_tls: bool = True
+
     @property
     def resolved_broker_encryption_key(self) -> str:
         if self.broker_token_encryption_key and self.broker_token_encryption_key.strip():
