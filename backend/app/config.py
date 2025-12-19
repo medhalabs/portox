@@ -71,7 +71,14 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> List[str]:
         origins = [o.strip() for o in (self.backend_cors_origins or "").split(",")]
-        return [o for o in origins if o]
+        # Normalize origins: remove trailing slashes and ensure they're valid
+        normalized = []
+        for origin in origins:
+            if origin:
+                # Remove trailing slash if present
+                origin = origin.rstrip("/")
+                normalized.append(origin)
+        return normalized
 
 
 settings = Settings()

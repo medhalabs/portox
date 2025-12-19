@@ -25,25 +25,32 @@ app = FastAPI(
 )
 
 # CORS middleware - must be added before exception handlers
+# Normalize origins to handle trailing slashes
+cors_origins = settings.cors_origins_list
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 
 def _get_cors_headers(request: Request) -> dict:
     """Get CORS headers if origin is allowed."""
     origin = request.headers.get("origin")
-    if origin and origin in settings.cors_origins_list:
-        return {
-            "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*",
-        }
+    if origin:
+        # Normalize origin by removing trailing slash
+        normalized_origin = origin.rstrip("/")
+        # Check if normalized origin is in allowed list
+        if normalized_origin in settings.cors_origins_list:
+            return {
+                "Access-Control-Allow-Origin": normalized_origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Methods": "*",
+                "Access-Control-Allow-Headers": "*",
+            }
     return {}
 
 
