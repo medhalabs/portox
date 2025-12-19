@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { getToken } from "@/lib/auth";
 import { getSettings, setSettings, type Currency, type MarketType, type UserSettings } from "@/lib/settings";
-import { apiFetch, apiPut } from "@/lib/api";
+import { apiFetch, apiPut, apiPost } from "@/lib/api";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -324,6 +324,58 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Account Management */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+          <div className="text-sm font-semibold">Account Management</div>
+          <div className="mt-1 text-xs text-slate-400">Change password, export data, or delete account</div>
+
+          {/* Change Password */}
+          <div className="mt-4 space-y-3">
+            <div className="text-xs font-medium text-slate-300">Change Password</div>
+            <ChangePasswordForm />
+          </div>
+
+          {/* Export Data */}
+          <div className="mt-6 border-t border-slate-800 pt-4">
+            <div className="text-xs font-medium text-slate-300 mb-2">Export Your Data</div>
+            <div className="text-xs text-slate-400 mb-3">
+              Download all your data in JSON format (GDPR compliance)
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const data = await apiFetch<any>("/auth/export-data");
+                  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `portik-export-${new Date().toISOString().split("T")[0]}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                } catch (err) {
+                  alert("Failed to export data. Please try again.");
+                  console.error(err);
+                }
+              }}
+              className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm hover:bg-slate-900"
+            >
+              Export All Data
+            </button>
+          </div>
+
+          {/* Delete Account */}
+          <div className="mt-6 border-t border-slate-800 pt-4">
+            <div className="text-xs font-medium text-red-400 mb-2">Delete Account</div>
+            <div className="text-xs text-slate-400 mb-3">
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </div>
+            <DeleteAccountForm />
+          </div>
+        </div>
+
         {/* Save Button */}
         <div className="flex items-center justify-between">
           <button
@@ -339,5 +391,155 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ChangePasswordForm() {
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+
+    if (newPassword !== confirmPassword) {
+      setError("New passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setError("New password must be at least 8 characters long");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await apiPost("/auth/change-password", {
+        old_password: oldPassword,
+        new_password: newPassword,
+      });
+      setSuccess(true);
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to change password");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <input
+        type="password"
+        value={oldPassword}
+        onChange={(e) => setOldPassword(e.target.value)}
+        placeholder="Current password"
+        required
+        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+      />
+      <input
+        type="password"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        placeholder="New password (min 8 characters)"
+        required
+        minLength={8}
+        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+      />
+      <input
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        placeholder="Confirm new password"
+        required
+        minLength={8}
+        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+      />
+      {error && (
+        <div className="text-xs text-red-400">{error}</div>
+      )}
+      {success && (
+        <div className="text-xs text-green-400">Password changed successfully!</div>
+      )}
+      <button
+        type="submit"
+        disabled={loading}
+        className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm hover:bg-slate-900 disabled:opacity-60"
+      >
+        {loading ? "Changing..." : "Change Password"}
+      </button>
+    </form>
+  );
+}
+
+function DeleteAccountForm() {
+  const [password, setPassword] = useState("");
+  const [confirmText, setConfirmText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (confirmText !== "DELETE") {
+      setError('Please type "DELETE" to confirm');
+      return;
+    }
+
+    if (!confirm("Are you absolutely sure? This will permanently delete all your data and cannot be undone.")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await apiPost("/auth/delete-account", { password });
+      alert("Account deleted successfully. Redirecting to login...");
+      router.push("/login");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete account");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Enter your password to confirm"
+        required
+        className="w-full rounded-lg border border-red-900/50 bg-slate-950 px-3 py-2 text-sm focus:border-red-500 focus:outline-none"
+      />
+      <input
+        type="text"
+        value={confirmText}
+        onChange={(e) => setConfirmText(e.target.value)}
+        placeholder='Type "DELETE" to confirm'
+        required
+        className="w-full rounded-lg border border-red-900/50 bg-slate-950 px-3 py-2 text-sm focus:border-red-500 focus:outline-none"
+      />
+      {error && (
+        <div className="text-xs text-red-400">{error}</div>
+      )}
+      <button
+        type="submit"
+        disabled={loading}
+        className="rounded-lg border border-red-900/50 bg-red-950/20 px-4 py-2 text-sm text-red-400 hover:bg-red-950/40 disabled:opacity-60"
+      >
+        {loading ? "Deleting..." : "Delete Account"}
+      </button>
+    </form>
   );
 }

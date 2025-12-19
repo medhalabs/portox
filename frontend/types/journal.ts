@@ -10,4 +10,15 @@ export type JournalEntry = {
   updated_at: string | null;
 };
 
+export type JournalAttachment = {
+  id: string;
+  journal_entry_id: string;
+  file_type: string;
+  file_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  created_at: string;
+};
+
 
