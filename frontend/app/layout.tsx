@@ -41,7 +41,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <p className="leading-relaxed">{DISCLAIMER}</p>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
               <p className="text-slate-400">
-                Product developed by <span className="text-slate-200">{VENDOR}</span>.
+                Product developed by{" "}
+                <Link
+                  href="https://medhalabs.in/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-200 hover:text-brand-400 transition-colors"
+                >
+                  {VENDOR}
+                </Link>
+                .
               </p>
               <p className="text-slate-500">© {year} {VENDOR}. All rights reserved.</p>
             </div>
