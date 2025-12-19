@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     duckdb_path: str | None = None
 
     # Comma-separated origins, e.g. "http://localhost:3000,https://yourdomain.com"
-    backend_cors_origins: str = "http://localhost:3000"
+    backend_cors_origins: str = "http://localhost:3000,https://portik.in,https://www.portik.in"
 
     jwt_secret_key: str | None = None
     jwt_algorithm: str = "HS256"
