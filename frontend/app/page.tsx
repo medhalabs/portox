@@ -26,6 +26,11 @@ export default function LandingPage() {
             context, and measure what works with clean, server‑side analytics.
           </p>
 
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-green-400/25 bg-green-400/10 px-3 py-1 text-xs text-green-100">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+            Free until January 2027
+          </div>
+
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link
               href="/register"
