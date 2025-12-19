@@ -1,4 +1,4 @@
-export const TOKEN_KEY = "portox_token";
+export const TOKEN_KEY = "portik_token";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;

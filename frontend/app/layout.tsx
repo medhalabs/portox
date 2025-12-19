@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 import { TopNav } from "./components/TopNav";
 
 export const metadata: Metadata = {
-  title: "portox",
+  title: "portik",
   description: "Portfolio & Trade Journal + Portfolio Analytics"
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
               <Link href="/" className="group flex items-center gap-2 text-lg font-semibold tracking-tight">
                 <span className="inline-flex h-2 w-2 rounded-full bg-brand-400 shadow-[0_0_18px_rgba(255,191,31,0.45)]" />
-                <span className="text-slate-100 group-hover:text-white">portox</span>
+                <span className="text-slate-100 group-hover:text-white">portik</span>
               </Link>
               <TopNav />
             </div>

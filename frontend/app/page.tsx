@@ -22,7 +22,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-300">
-            portox is a portfolio + trade journal SaaS for active traders who want clarity: track executions, capture
+            portik is a portfolio + trade journal SaaS for active traders who want clarity: track executions, capture
             context, and measure what works with clean, server‑side analytics.
           </p>
 

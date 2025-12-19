@@ -1,4 +1,4 @@
-# portox frontend (Next.js)
+# portik frontend (Next.js)
 
 **Disclaimer:** This platform does not provide investment advice. Analytics are for educational purposes only.
 

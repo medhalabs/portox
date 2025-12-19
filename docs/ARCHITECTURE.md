@@ -1,4 +1,4 @@
-# Architecture (portox)
+# Architecture (portik)
 
 **Hard constraint:** frontend, backend, and database logic are isolated in separate folders. No shared modules.
 

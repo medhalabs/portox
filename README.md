@@ -1,4 +1,4 @@
-# portox — Portfolio & Trade Journal + Portfolio Analytics SaaS
+# portik — Portfolio & Trade Journal + Portfolio Analytics SaaS
 
 **Disclaimer:** This platform does not provide investment advice. Analytics are for educational purposes only.
 

@@ -19,7 +19,7 @@ DISCLAIMER = "This platform does not provide investment advice. Analytics are fo
 VENDOR = "Medhā Labs"
 
 app = FastAPI(
-    title="portox API",
+    title="portik API",
     version="0.1.0",
     description=f"{DISCLAIMER}\n\nNo predictions. No buy/sell signals.",
 )
@@ -86,7 +86,7 @@ def _startup() -> None:
 
 @app.get("/")
 def root() -> dict:
-    return {"name": "portox", "vendor": VENDOR, "disclaimer": DISCLAIMER}
+    return {"name": "portik", "vendor": VENDOR, "disclaimer": DISCLAIMER}
 
 
 app.include_router(auth_router)

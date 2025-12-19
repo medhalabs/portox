@@ -1,4 +1,4 @@
-# portox backend (FastAPI)
+# portik backend (FastAPI)
 
 **Disclaimer:** This platform does not provide investment advice. Analytics are for educational purposes only.
 
