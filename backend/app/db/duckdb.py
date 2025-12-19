@@ -44,6 +44,23 @@ def init_db() -> None:
         # Execute schema (uses IF NOT EXISTS, so safe to run multiple times)
         # This allows new tables to be added to schema.sql and created on startup
         conn.execute(schema_sql)
+        
+        # Migrations: Add new columns to existing tables if they don't exist
+        # DuckDB doesn't support IF NOT EXISTS for ALTER TABLE ADD COLUMN, so we try-catch
+        try:
+            conn.execute("ALTER TABLE journal_entries ADD COLUMN entry_rationale TEXT")
+        except Exception:
+            pass  # Column already exists or table doesn't exist
+        
+        try:
+            conn.execute("ALTER TABLE journal_entries ADD COLUMN exit_rationale TEXT")
+        except Exception:
+            pass  # Column already exists or table doesn't exist
+        
+        try:
+            conn.execute("ALTER TABLE journal_entries ADD COLUMN updated_at TIMESTAMP")
+        except Exception:
+            pass  # Column already exists or table doesn't exist
 
 
 def fetch_all(sql: str, params: Optional[Sequence[Any]] = None) -> List[Dict[str, Any]]:

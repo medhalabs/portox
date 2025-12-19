@@ -50,6 +50,10 @@ class Settings(BaseSettings):
     smtp_from_name: str = "portik"
     smtp_use_tls: bool = True
 
+    # File upload settings for journal attachments
+    upload_dir: str | None = None
+    max_upload_size_mb: int = 10
+
     @property
     def resolved_broker_encryption_key(self) -> str:
         if self.broker_token_encryption_key and self.broker_token_encryption_key.strip():

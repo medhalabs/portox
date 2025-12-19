@@ -14,6 +14,7 @@ export default function SettingsPage() {
   const [shortTermTaxRate, setShortTermTaxRate] = useState(15);
   const [longTermTaxRate, setLongTermTaxRate] = useState(10);
   const [saved, setSaved] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   
   // Notification preferences
   const [notifications, setNotifications] = useState({
@@ -36,6 +37,11 @@ export default function SettingsPage() {
     setMarketType(settings.marketType);
     setShortTermTaxRate(settings.shortTermTaxRate);
     setLongTermTaxRate(settings.longTermTaxRate);
+    
+    // Load user email
+    apiFetch<{ email: string }>("/auth/me")
+      .then((user) => setUserEmail(user.email))
+      .catch((err) => console.error("Failed to load user info:", err));
     
     // Load notification preferences
     apiFetch<any>("/notifications/preferences")
@@ -68,6 +74,19 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-6">
+        {/* User Info */}
+        {userEmail && (
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+            <div className="text-sm font-semibold">Account</div>
+            <div className="mt-1 text-xs text-slate-400">Your account information</div>
+            <div className="mt-4">
+              <div className="text-sm text-slate-200">
+                <span className="text-slate-400">Email:</span> {userEmail}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Currency Selection */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
           <div className="text-sm font-semibold">Currency</div>
