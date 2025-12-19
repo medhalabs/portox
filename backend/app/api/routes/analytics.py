@@ -14,6 +14,7 @@ from app.services.trade_analysis_service import (
     calculate_strategy_comparison_matrix,
     calculate_win_loss_distribution,
 )
+from app.services.performance_comparison_service import compare_performance_periods
 from app.services.export_service import export_analytics_csv, export_realized_matches_csv
 from app.services.pdf_service import generate_performance_report
 from app.services.pnl_service import TradeRow, compute_fifo
@@ -176,6 +177,30 @@ def win_loss_distribution(user: dict = Depends(get_current_user)) -> dict:
     """Get win/loss distribution histogram data"""
     trades = _load_trades(str(user["id"]))
     return calculate_win_loss_distribution(trades)
+
+
+@router.get("/compare-performance")
+def compare_performance(
+    period1_start: str,
+    period1_end: str,
+    period2_start: str,
+    period2_end: str,
+    user: dict = Depends(get_current_user),
+) -> dict:
+    """Compare performance between two time periods"""
+    from datetime import datetime
+    
+    trades = _load_trades(str(user["id"]))
+    
+    try:
+        p1_start = datetime.fromisoformat(period1_start.replace("Z", "+00:00"))
+        p1_end = datetime.fromisoformat(period1_end.replace("Z", "+00:00"))
+        p2_start = datetime.fromisoformat(period2_start.replace("Z", "+00:00"))
+        p2_end = datetime.fromisoformat(period2_end.replace("Z", "+00:00"))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid date format: {e}")
+    
+    return compare_performance_periods(trades, p1_start, p1_end, p2_start, p2_end)
 
 
 @router.post("/tax/{tax_year}")

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { apiPost } from "@/lib/api";
+import { apiPost, apiPostFormData } from "@/lib/api";
 import type { Trade } from "@/types/trade";
 
 export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCreated: () => void }) {
@@ -16,6 +16,8 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
   const [exitRationale, setExitRationale] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   
   // Rationale templates
   const entryTemplates = [
@@ -52,7 +54,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
     setError(null);
     setLoading(true);
     try {
-      await apiPost("/journal", {
+      const entry = await apiPost<{ id: string }>("/journal", {
         trade_id: tradeId,
         strategy: strategy || null,
         emotion: emotion || null,
@@ -60,11 +62,30 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
         entry_rationale: entryRationale || null,
         exit_rationale: exitRationale || null,
       });
+
+      // Upload files if any
+      if (selectedFiles.length > 0) {
+        setUploadingFiles(true);
+        try {
+          for (const file of selectedFiles) {
+            const formData = new FormData();
+            formData.append("file", file);
+            await apiPostFormData(`/journal/attachments/${entry.id}`, formData);
+          }
+        } catch (fileErr) {
+          console.error("Failed to upload some files:", fileErr);
+          // Continue even if file upload fails
+        } finally {
+          setUploadingFiles(false);
+        }
+      }
+
       setStrategy("");
       setEmotion("");
       setNotes("");
       setEntryRationale("");
       setExitRationale("");
+      setSelectedFiles([]);
       onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create journal entry");
@@ -188,14 +209,36 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
           />
         </label>
 
-        {error ? <div className="rounded-lg border border-rose-900 bg-rose-950/40 p-2 text-xs">{error}</div> : null}
+          <label className="block">
+            <div className="text-xs font-medium text-slate-300">Attachments (optional)</div>
+            <div className="mt-1 text-xs text-slate-400 mb-2">
+              Upload images, audio files, or documents (max 10MB per file)
+            </div>
+            <input
+              type="file"
+              multiple
+              accept="image/*,audio/*,.pdf,.txt"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                setSelectedFiles(files);
+              }}
+              className="block w-full text-sm text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-3 file:py-2 file:text-sm file:text-slate-100 hover:file:bg-slate-700"
+            />
+            {selectedFiles.length > 0 && (
+              <div className="mt-2 text-xs text-slate-400">
+                {selectedFiles.length} file(s) selected
+              </div>
+            )}
+          </label>
 
-        <button
-          disabled={loading}
-          className="w-full rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
-        >
-          {loading ? "Saving..." : "Add entry"}
-        </button>
+          {error ? <div className="rounded-lg border border-rose-900 bg-rose-950/40 p-2 text-xs">{error}</div> : null}
+
+          <button
+            disabled={loading || uploadingFiles}
+            className="w-full rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
+          >
+            {uploadingFiles ? "Uploading files..." : loading ? "Saving..." : "Add entry"}
+          </button>
       </form>
       <div className="mt-3 text-xs text-slate-400">
         Tagging is stored via <span className="font-mono">strategy</span> and <span className="font-mono">emotion</span>{" "}

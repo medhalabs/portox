@@ -10,6 +10,7 @@ from app.api.routes.analytics import router as analytics_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.brokers import router as brokers_router
 from app.api.routes.journal import router as journal_router
+from app.api.routes import journal_attachments
 from app.api.routes.notifications import router as notifications_router
 from app.api.routes.portfolio import router as portfolio_router
 from app.api.routes.trades import router as trades_router
@@ -152,6 +153,7 @@ def root() -> dict:
 app.include_router(auth_router)
 app.include_router(trades_router)
 app.include_router(journal_router)
+app.include_router(journal_attachments.router)
 app.include_router(portfolio_router)
 app.include_router(analytics_router)
 app.include_router(brokers_router)

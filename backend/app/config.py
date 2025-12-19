@@ -66,6 +66,17 @@ class Settings(BaseSettings):
         return Path(__file__).resolve().parents[2]
 
     @property
+    def resolved_upload_dir(self) -> Path:
+        """Resolve upload directory for file attachments"""
+        if self.upload_dir:
+            upload_path = Path(self.upload_dir)
+            if upload_path.is_absolute():
+                return upload_path
+            return self.repo_root / upload_path
+        # Default to repo_root/uploads
+        return self.repo_root / "uploads"
+
+    @property
     def resolved_duckdb_path(self) -> Path:
         if self.duckdb_path:
             path = Path(self.duckdb_path).expanduser().resolve()

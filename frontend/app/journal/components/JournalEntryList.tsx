@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
-import { apiDelete, apiPut } from "@/lib/api";
-import type { JournalEntry } from "@/types/journal";
+import { useEffect, useMemo, useState } from "react";
+import { apiDelete, apiFetch, apiFetchBlob, apiPut } from "@/lib/api";
+import type { JournalAttachment, JournalEntry } from "@/types/journal";
 import type { Trade } from "@/types/trade";
 import { formatDateTime } from "@/utils/formatters";
 
@@ -20,6 +19,27 @@ export function JournalEntryList({
 }) {
   const tradeById = useMemo(() => new Map(trades.map((t) => [t.id, t])), [trades]);
   const [editing, setEditing] = useState<JournalEntry | null>(null);
+  const [attachmentsByEntryId, setAttachmentsByEntryId] = useState<Map<string, JournalAttachment[]>>(new Map());
+
+  // Fetch attachments for all entries
+  useEffect(() => {
+    async function fetchAttachments() {
+      const attachmentMap = new Map<string, JournalAttachment[]>();
+      for (const entry of entries) {
+        try {
+          const attachments = await apiFetch<JournalAttachment[]>(`/journal/attachments/${entry.id}`);
+          attachmentMap.set(entry.id, attachments);
+        } catch (err) {
+          // Entry might not have attachments, that's fine
+          attachmentMap.set(entry.id, []);
+        }
+      }
+      setAttachmentsByEntryId(attachmentMap);
+    }
+    if (entries.length > 0) {
+      fetchAttachments();
+    }
+  }, [entries]);
 
   const filtered = useMemo(() => {
     const s = filters.strategyContains.trim().toLowerCase();
@@ -129,6 +149,16 @@ export function JournalEntryList({
                   <div className="whitespace-pre-wrap text-sm text-slate-200">{x.notes}</div>
                 </div>
               ) : null}
+              {attachmentsByEntryId.get(x.id) && attachmentsByEntryId.get(x.id)!.length > 0 ? (
+                <div className="mt-3 border-t border-slate-800 pt-3">
+                  <div className="text-xs font-medium text-slate-400 mb-2">Attachments</div>
+                  <div className="flex flex-wrap gap-2">
+                    {attachmentsByEntryId.get(x.id)!.map((attachment) => (
+                      <AttachmentItem key={attachment.id} attachment={attachment} />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           );
         })
@@ -136,6 +166,64 @@ export function JournalEntryList({
 
       {editing ? <EditJournalModal entry={editing} onClose={() => setEditing(null)} onSave={onSave} /> : null}
     </div>
+  );
+}
+
+function AttachmentItem({ attachment }: { attachment: JournalAttachment }) {
+  const [downloading, setDownloading] = useState(false);
+
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function getFileIcon(fileType: string): string {
+    switch (fileType) {
+      case "image":
+        return "🖼️";
+      case "audio":
+        return "🎵";
+      case "document":
+        return "📄";
+      default:
+        return "📎";
+    }
+  }
+
+  async function handleDownload() {
+    setDownloading(true);
+    try {
+      const blob = await apiFetchBlob(`/journal/attachments/download/${attachment.id}`);
+      
+      // Create blob URL and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = attachment.file_name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to download attachment:", err);
+      alert("Failed to download attachment");
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={handleDownload}
+      disabled={downloading}
+      className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs hover:bg-slate-800 hover:border-brand-400/30 disabled:opacity-60"
+    >
+      <span>{getFileIcon(attachment.file_type)}</span>
+      <span className="text-slate-200">{attachment.file_name}</span>
+      <span className="text-slate-400">({formatFileSize(attachment.file_size)})</span>
+      {downloading && <span className="text-slate-400">...</span>}
+    </button>
   );
 }
 
