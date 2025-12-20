@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from app.db.duckdb import execute, fetch_all, fetch_one
+from app.db.postgresql import execute, fetch_all, fetch_one
 from app.utils.crypto import decrypt_json, encrypt_json
 
 

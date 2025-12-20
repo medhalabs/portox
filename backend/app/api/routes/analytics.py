@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 
 from app.auth.dependencies import get_current_user
-from app.db.duckdb import fetch_all
+from app.db.postgresql import fetch_all
 from app.models.analytics import OverviewRequest
 from app.services.analytics_service import overview_from_trades, performance_from_trades, realized_matches
 from app.services.trade_analysis_service import (

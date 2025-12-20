@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse
 
 from app.auth.dependencies import get_current_user
 from app.config import settings
-from app.db.duckdb import execute, fetch_all, fetch_one
+from app.db.postgresql import execute, fetch_all, fetch_one
 from app.models.journal import JournalAttachment
 
 

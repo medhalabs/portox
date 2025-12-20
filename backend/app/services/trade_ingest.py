@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from app.db.duckdb import execute, fetch_one
+from app.db.postgresql import execute, fetch_one
 
 
 def is_duplicate_trade(user_id: str, trade: Dict[str, Any]) -> bool:
