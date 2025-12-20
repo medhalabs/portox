@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFil
 from fastapi.responses import StreamingResponse
 
 from app.auth.dependencies import get_current_user
-from app.db.duckdb import execute, fetch_all, fetch_one
+from app.db.postgresql import execute, fetch_all, fetch_one
 from app.models.trade import Trade, TradeCreate, TradeUpdate
 from app.services.csv_importer import import_trades_csv
 from app.services.export_service import export_trades_csv, export_trades_excel

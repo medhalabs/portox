@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.auth.jwt import decode_token
-from app.db.duckdb import fetch_one
+from app.db.postgresql import fetch_one
 
 security = HTTPBearer(auto_error=False)
 

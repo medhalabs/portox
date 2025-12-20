@@ -16,7 +16,11 @@ class Settings(BaseSettings):
 
     env: str = "dev"
 
-    # Computed default: <repo_root>/database/trading_data.duckdb
+    # PostgreSQL connection URL
+    # Format: postgresql://user:password@host:port/database
+    postgresql_url: str | None = None
+
+    # Computed default: <repo_root>/database/trading_data.duckdb (deprecated, kept for backward compatibility)
     duckdb_path: str | None = None
 
     # Comma-separated origins, e.g. "http://localhost:3000,https://yourdomain.com"
@@ -78,6 +82,7 @@ class Settings(BaseSettings):
 
     @property
     def resolved_duckdb_path(self) -> Path:
+        """Deprecated: Kept for backward compatibility. Use PostgreSQL instead."""
         if self.duckdb_path:
             path = Path(self.duckdb_path).expanduser().resolve()
             # If the path is /data and it doesn't exist or isn't writable, fall back

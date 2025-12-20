@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth.dependencies import get_current_user
-from app.db.duckdb import fetch_all
+from app.db.postgresql import fetch_all
 from app.models.analytics import MarkPricesRequest
 from app.services.analytics_service import overview_from_trades
 from app.services.pnl_service import TradeRow

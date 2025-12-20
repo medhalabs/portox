@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 
 from app.auth.dependencies import get_current_user
 from app.auth.jwt import create_access_token
-from app.db.duckdb import execute, fetch_all, fetch_one
+from app.db.postgresql import execute, fetch_all, fetch_one
 from app.models.user import LoginRequest, RegisterRequest, TokenResponse, UserPublic
 from pydantic import BaseModel, Field
 

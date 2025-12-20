@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from app.db.duckdb import fetch_all, fetch_one, execute
+from app.db.postgresql import fetch_all, fetch_one, execute
 from app.services.email_service import (
     send_email,
     format_daily_summary_email,
@@ -13,7 +13,7 @@ from app.services.email_service import (
 )
 from app.services.analytics_service import overview_from_trades
 from app.services.pnl_service import TradeRow
-from app.db.duckdb import fetch_all as db_fetch_all
+from app.db.postgresql import fetch_all as db_fetch_all
 from app.services.in_app_notification_service import create_notification
 
 
@@ -36,6 +36,14 @@ def get_notification_preferences(user_id: str) -> Optional[Dict[str, Any]]:
         return None
     
     import json
+    # PostgreSQL JSONB returns dict directly, DuckDB returns string
+    milestone_thresholds = row.get("milestone_thresholds")
+    if milestone_thresholds is None:
+        milestone_thresholds = {}
+    elif isinstance(milestone_thresholds, str):
+        milestone_thresholds = json.loads(milestone_thresholds)
+    # else it's already a dict (PostgreSQL JSONB)
+    
     return {
         "id": str(row["id"]),
         "user_id": str(row["user_id"]),
@@ -44,7 +52,7 @@ def get_notification_preferences(user_id: str) -> Optional[Dict[str, Any]]:
         "journal_reminder_enabled": bool(row.get("journal_reminder_enabled", False)),
         "journal_reminder_hours": int(row.get("journal_reminder_hours", 24)),
         "milestone_alerts_enabled": bool(row.get("milestone_alerts_enabled", False)),
-        "milestone_thresholds": json.loads(row.get("milestone_thresholds", "{}")) if row.get("milestone_thresholds") else {},
+        "milestone_thresholds": milestone_thresholds,
         "position_alerts_enabled": bool(row.get("position_alerts_enabled", False)),
         "unrealized_pnl_threshold": float(row.get("unrealized_pnl_threshold", 0)),
         "email_enabled": bool(row.get("email_enabled", False)),

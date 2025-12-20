@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from app.db.duckdb import fetch_all, fetch_one, execute
+from app.db.postgresql import fetch_all, fetch_one, execute
 
 
 def create_notification(
@@ -55,6 +55,14 @@ def get_user_notifications(user_id: str, unread_only: bool = False, limit: Optio
     import json
     notifications = []
     for row in rows:
+        # PostgreSQL JSONB returns dict directly, DuckDB returns string
+        metadata = row.get("metadata")
+        if metadata is None:
+            metadata = {}
+        elif isinstance(metadata, str):
+            metadata = json.loads(metadata)
+        # else it's already a dict (PostgreSQL JSONB)
+        
         notifications.append({
             "id": str(row["id"]),
             "user_id": str(row["user_id"]),
@@ -62,7 +70,7 @@ def get_user_notifications(user_id: str, unread_only: bool = False, limit: Optio
             "title": row["title"],
             "message": row["message"],
             "read": bool(row.get("read", False)),
-            "metadata": json.loads(row["metadata"]) if row.get("metadata") else {},
+            "metadata": metadata,
             "created_at": str(row["created_at"]),
         })
     

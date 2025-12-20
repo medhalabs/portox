@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import StreamingResponse
 
 from app.auth.dependencies import get_current_user
-from app.db.duckdb import execute, fetch_all, fetch_one
+from app.db.postgresql import execute, fetch_all, fetch_one
 from app.models.journal import JournalEntry, JournalEntryCreate, JournalEntryUpdate
 from app.services.export_service import export_journal_csv
 

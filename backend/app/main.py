@@ -15,7 +15,7 @@ from app.api.routes.notifications import router as notifications_router
 from app.api.routes.portfolio import router as portfolio_router
 from app.api.routes.trades import router as trades_router
 from app.config import settings
-from app.db.duckdb import init_db
+from app.db.postgresql import init_db
 
 DISCLAIMER = "This platform does not provide investment advice. Analytics are for educational purposes only."
 VENDOR = "Medhā Labs"
@@ -104,7 +104,7 @@ def _start_scheduler() -> None:
         check_milestone_alerts,
         check_position_alerts,
     )
-    from app.db.duckdb import fetch_all
+    from app.db.postgresql import fetch_all
     
     scheduler = BackgroundScheduler()
     
