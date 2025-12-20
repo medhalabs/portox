@@ -52,30 +52,32 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <div className="rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-950/35 p-4 sm:p-5 shadow-card">
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm font-semibold">Add trade</div>
-        <div className="text-xs text-slate-400">Manual entry</div>
+        <div className="text-xs text-slate-400 hidden sm:block">Manual entry</div>
       </div>
-      <form onSubmit={onSubmit} className="mt-4 space-y-3">
+      <form onSubmit={onSubmit} className="mt-4 space-y-3 sm:space-y-3">
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Symbol</div>
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Symbol</div>
           <input
             value={symbol}
             onChange={(e) => setSymbol(e.target.value.toUpperCase())}
             required
-            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+            className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
             placeholder="RELIANCE"
+            inputMode="text"
+            autoCapitalize="characters"
           />
         </label>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="block">
-            <div className="text-xs font-medium text-slate-300">Side</div>
+            <div className="text-xs font-medium text-slate-300 mb-1.5">Side</div>
             <select
               value={side}
               onChange={(e) => setSide(e.target.value as "BUY" | "SELL")}
-              className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+              className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
             >
               <option value="BUY">BUY</option>
               <option value="SELL">SELL</option>
@@ -83,21 +85,22 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
           </label>
 
           <label className="block">
-            <div className="text-xs font-medium text-slate-300">Quantity</div>
+            <div className="text-xs font-medium text-slate-300 mb-1.5">Quantity</div>
             <input
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
               type="number"
               min={1}
               required
-              className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+              className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
+              inputMode="numeric"
             />
           </label>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="block">
-            <div className="text-xs font-medium text-slate-300">Price</div>
+            <div className="text-xs font-medium text-slate-300 mb-1.5">Price</div>
             <input
               value={price}
               onChange={(e) => setPrice(Number(e.target.value))}
@@ -105,60 +108,62 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
               min={0}
               step="0.01"
               required
-              className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+              className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
+              inputMode="decimal"
             />
           </label>
           <label className="block">
-            <div className="text-xs font-medium text-slate-300">Fees</div>
+            <div className="text-xs font-medium text-slate-300 mb-1.5">Fees</div>
             <input
               value={fees}
               onChange={(e) => setFees(Number(e.target.value))}
               type="number"
               min={0}
               step="0.01"
-              className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+              className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
+              inputMode="decimal"
             />
           </label>
         </div>
 
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Trade time</div>
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Trade time</div>
           <input
             value={tradeTime}
             onChange={(e) => setTradeTime(e.target.value)}
             type="datetime-local"
             required
-            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+            className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
           />
         </label>
 
         {error ? <div className="rounded-lg border border-rose-900 bg-rose-950/40 p-2 text-xs">{error}</div> : null}
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
           <button
             disabled={loading}
             type="submit"
-            className="flex-1 rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
+            className="flex-1 rounded-xl bg-brand-400 px-4 py-3.5 sm:py-2.5 text-base sm:text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60 touch-manipulation min-h-[48px] sm:min-h-0"
           >
             {loading ? "Saving..." : "Add trade"}
           </button>
           <button
             type="button"
             onClick={() => setShowSaveTemplate(!showSaveTemplate)}
-            className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+            className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3.5 sm:py-2.5 text-base sm:text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[48px] sm:min-h-0"
           >
             Save Template
           </button>
         </div>
 
         {showSaveTemplate && (
-          <div className="mt-2 rounded-lg border border-slate-800 bg-slate-950 p-3">
+          <div className="mt-2 rounded-lg border border-slate-800 bg-slate-950 p-3 sm:p-3">
             <input
               type="text"
               value={templateName}
               onChange={(e) => setTemplateName(e.target.value)}
               placeholder="Template name"
-              className="mb-2 w-full rounded-lg border border-slate-700 bg-black px-2 py-1 text-sm"
+              className="mb-2 w-full rounded-lg border border-slate-700 bg-black px-3 py-2.5 sm:px-2 sm:py-1 text-base sm:text-sm touch-manipulation"
             />
             <button
               type="button"
@@ -177,7 +182,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
                   setShowSaveTemplate(false);
                 }
               }}
-              className="w-full rounded-lg bg-slate-800 px-3 py-1.5 text-sm hover:bg-slate-700"
+              className="w-full rounded-lg bg-slate-800 px-3 py-3 sm:py-1.5 text-base sm:text-sm hover:bg-slate-700 touch-manipulation min-h-[44px] sm:min-h-0"
             >
               Save
             </button>
@@ -200,7 +205,7 @@ export function AddTrade({ onCreated }: { onCreated: () => void }) {
                     setPrice(applied.price);
                     setFees(applied.fees);
                   }}
-                  className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs hover:bg-slate-900"
+                  className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 sm:px-2 sm:py-1 text-sm sm:text-xs hover:bg-slate-900 touch-manipulation min-h-[40px] sm:min-h-0"
                 >
                   {t.name}
                 </button>

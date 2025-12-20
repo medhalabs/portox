@@ -13,16 +13,16 @@ export function PnLChart({ analytics }: { analytics: AnalyticsOverview }) {
   });
 
   return (
-    <div className="rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-950/35 p-4 sm:p-5 shadow-card">
       <div className="text-sm font-semibold">Weekly P&amp;L (realized)</div>
-      <div className="mt-4 h-48">
+      <div className="mt-4 h-44 sm:h-48">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-            <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
-            <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `${v}`} />
+            <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
+            <YAxis stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}`} />
             <Tooltip
-              contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0" }}
+              contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0", fontSize: "12px" }}
               formatter={(value) => formatCurrency(Number(value))}
             />
             <Bar dataKey="pnl" fill="#ffbf1f" />

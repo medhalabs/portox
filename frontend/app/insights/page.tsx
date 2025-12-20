@@ -65,19 +65,19 @@ export default function InsightsPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Insights</h1>
-        <div className="flex gap-2">
+        <h1 className="text-xl sm:text-2xl font-semibold">Insights</h1>
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => exportAnalyticsCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
-            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 sm:py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
           >
             Export Analytics CSV
           </button>
           <button
             type="button"
             onClick={() => exportRealizedMatchesCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
-            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 sm:py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
           >
             Export Matches CSV
           </button>
@@ -127,10 +127,10 @@ export default function InsightsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dailyChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                  <XAxis dataKey="short" stroke="#94a3b8" fontSize={12} />
-                  <YAxis stroke="#94a3b8" fontSize={12} />
+                  <XAxis dataKey="short" stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
                   <Tooltip
-                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0" }}
+                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0", fontSize: "12px" }}
                     formatter={(value) => formatCurrency(Number(value))}
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.date || label}
                   />
@@ -145,10 +145,10 @@ export default function InsightsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={weeklyChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                  <XAxis dataKey="week" stroke="#94a3b8" fontSize={12} />
-                  <YAxis stroke="#94a3b8" fontSize={12} />
+                  <XAxis dataKey="week" stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
                   <Tooltip
-                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0" }}
+                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0", fontSize: "12px" }}
                     formatter={(value) => formatCurrency(Number(value))}
                   />
                   <Bar dataKey="pnl" fill="#22c55e" />
@@ -162,10 +162,10 @@ export default function InsightsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={equityChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                  <XAxis dataKey="short" stroke="#94a3b8" fontSize={12} />
-                  <YAxis stroke="#94a3b8" fontSize={12} />
+                  <XAxis dataKey="short" stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
                   <Tooltip
-                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0" }}
+                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0", fontSize: "12px" }}
                     formatter={(value) => formatCurrency(Number(value))}
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.date || label}
                   />
@@ -190,7 +190,7 @@ export default function InsightsPage() {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-950/35 p-4 sm:p-5 shadow-card">
       <div className="text-sm font-semibold">{title}</div>
       <div className="mt-3">{children}</div>
     </div>
@@ -199,9 +199,9 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="h-64 rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
+    <div className="h-64 sm:h-64 rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-950/35 p-4 sm:p-5 shadow-card">
       <div className="text-sm font-semibold">{title}</div>
-      <div className="mt-4 h-48">{children}</div>
+      <div className="mt-4 h-44 sm:h-48">{children}</div>
     </div>
   );
 }
@@ -222,31 +222,62 @@ function BreakdownTable({
   title: string;
   rows: { key: string; pnl: number; matches: number; win_rate: number }[];
 }) {
+  const displayRows = rows.slice(0, 10);
   return (
-    <div className="rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-950/35 p-4 sm:p-5 shadow-card">
       <div className="text-sm font-semibold">{title}</div>
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead className="text-xs text-slate-400">
-            <tr>
-              <th className="py-2">Key</th>
-              <th className="py-2">P&amp;L</th>
-              <th className="py-2">Matches</th>
-              <th className="py-2">Win rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.slice(0, 10).map((r) => (
-              <tr key={r.key} className="border-t border-slate-800">
-                <td className="py-2 font-medium">{r.key}</td>
-                <td className="py-2">{formatCurrency(r.pnl)}</td>
-                <td className="py-2">{r.matches}</td>
-                <td className="py-2">{formatPercent(r.win_rate)}</td>
-              </tr>
+      {displayRows.length === 0 ? (
+        <div className="mt-4 py-3 text-slate-400 text-sm">No data.</div>
+      ) : (
+        <>
+          {/* Mobile card view */}
+          <div className="mt-4 space-y-2 md:hidden">
+            {displayRows.map((r) => (
+              <div key={r.key} className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+                <div className="font-medium text-sm mb-2">{r.key}</div>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div>
+                    <div className="text-slate-400">P&amp;L</div>
+                    <div className="font-medium mt-0.5">{formatCurrency(r.pnl)}</div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Matches</div>
+                    <div className="font-medium mt-0.5">{r.matches}</div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Win rate</div>
+                    <div className="font-medium mt-0.5">{formatPercent(r.win_rate)}</div>
+                  </div>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+
+          {/* Desktop table view */}
+          <div className="mt-4 overflow-x-auto hidden md:block">
+            <table className="w-full text-left text-sm">
+              <thead className="text-xs text-slate-400">
+                <tr>
+                  <th className="py-2">Key</th>
+                  <th className="py-2">P&amp;L</th>
+                  <th className="py-2">Matches</th>
+                  <th className="py-2">Win rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayRows.map((r) => (
+                  <tr key={r.key} className="border-t border-slate-800">
+                    <td className="py-2 font-medium">{r.key}</td>
+                    <td className="py-2">{formatCurrency(r.pnl)}</td>
+                    <td className="py-2">{r.matches}</td>
+                    <td className="py-2">{formatPercent(r.win_rate)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
       <div className="mt-2 text-xs text-slate-400">Top 10 by absolute P&amp;L.</div>
     </div>
   );

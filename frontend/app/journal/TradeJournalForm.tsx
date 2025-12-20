@@ -95,19 +95,19 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
   }
 
   return (
-    <div className="rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 shadow-card">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-950/35 p-4 sm:p-5 shadow-card">
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm font-semibold">Add journal entry</div>
-        <div className="text-xs text-slate-400">Tag + notes</div>
+        <div className="text-xs text-slate-400 hidden sm:block">Tag + notes</div>
       </div>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Trade</div>
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Trade</div>
           <select
             value={tradeId}
             onChange={(e) => setTradeId(e.target.value)}
             required
-            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+            className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
           >
             <option value="" disabled>
               Select a trade
@@ -121,28 +121,30 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
         </label>
 
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Strategy (tag)</div>
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Strategy (tag)</div>
           <input
             value={strategy}
             onChange={(e) => setStrategy(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+            className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
             placeholder="Breakout"
+            inputMode="text"
           />
         </label>
 
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Emotion (tag)</div>
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Emotion (tag)</div>
           <input
             value={emotion}
             onChange={(e) => setEmotion(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+            className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
             placeholder="Calm / FOMO / Frustrated..."
+            inputMode="text"
           />
         </label>
 
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Entry Rationale</div>
-          <div className="mt-1 space-y-2">
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Entry Rationale</div>
+          <div className="space-y-2">
             <select
               value={entryTemplates.find(t => t.value === entryRationale)?.value || ""}
               onChange={(e) => {
@@ -151,7 +153,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
                   setEntryRationale(selected.value);
                 }
               }}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:border-brand-400/40 focus:outline-none"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base sm:text-sm text-slate-200 focus:border-brand-400/40 focus:outline-none touch-manipulation"
             >
               {entryTemplates.map((tpl, idx) => (
                 <option key={idx} value={tpl.value}>
@@ -163,15 +165,15 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
               value={entryRationale}
               onChange={(e) => setEntryRationale(e.target.value)}
               rows={3}
-              className="w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm text-slate-200 focus:border-brand-400/40 focus:outline-none"
+              className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm text-slate-200 focus:border-brand-400/40 focus:outline-none touch-manipulation"
               placeholder="Why did you enter this trade? (Use template above or write your own)"
             />
           </div>
         </label>
 
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Exit Rationale</div>
-          <div className="mt-1 space-y-2">
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Exit Rationale</div>
+          <div className="space-y-2">
             <select
               value={exitTemplates.find(t => t.value === exitRationale)?.value || ""}
               onChange={(e) => {
@@ -180,7 +182,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
                   setExitRationale(selected.value);
                 }
               }}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:border-brand-400/40 focus:outline-none"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base sm:text-sm text-slate-200 focus:border-brand-400/40 focus:outline-none touch-manipulation"
             >
               {exitTemplates.map((tpl, idx) => (
                 <option key={idx} value={tpl.value}>
@@ -192,26 +194,26 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
               value={exitRationale}
               onChange={(e) => setExitRationale(e.target.value)}
               rows={3}
-              className="w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm text-slate-200 focus:border-brand-400/40 focus:outline-none"
+              className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm text-slate-200 focus:border-brand-400/40 focus:outline-none touch-manipulation"
               placeholder="Why did you exit this trade? (Use template above or write your own)"
             />
           </div>
         </label>
 
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Notes</div>
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Notes</div>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={6}
-            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm focus:border-brand-400/40 focus:outline-none"
+            className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm focus:border-brand-400/40 focus:outline-none touch-manipulation"
             placeholder="What went well? What to improve next time?"
           />
         </label>
 
           <label className="block">
-            <div className="text-xs font-medium text-slate-300">Attachments (optional)</div>
-            <div className="mt-1 text-xs text-slate-400 mb-2">
+            <div className="text-xs font-medium text-slate-300 mb-1.5">Attachments (optional)</div>
+            <div className="text-xs text-slate-400 mb-2">
               Upload images, audio files, or documents (max 10MB per file)
             </div>
             <input
@@ -222,7 +224,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
                 const files = Array.from(e.target.files || []);
                 setSelectedFiles(files);
               }}
-              className="block w-full text-sm text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-3 file:py-2 file:text-sm file:text-slate-100 hover:file:bg-slate-700"
+              className="block w-full text-sm text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-4 file:py-3 sm:file:py-2 file:text-sm file:text-slate-100 hover:file:bg-slate-700 touch-manipulation"
             />
             {selectedFiles.length > 0 && (
               <div className="mt-2 text-xs text-slate-400">
@@ -235,7 +237,7 @@ export function TradeJournalForm({ trades, onCreated }: { trades: Trade[]; onCre
 
           <button
             disabled={loading || uploadingFiles}
-            className="w-full rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
+            className="w-full rounded-xl bg-brand-400 px-4 py-3.5 sm:py-2.5 text-base sm:text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60 touch-manipulation min-h-[48px] sm:min-h-0"
           >
             {uploadingFiles ? "Uploading files..." : loading ? "Saving..." : "Add entry"}
           </button>
