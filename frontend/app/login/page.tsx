@@ -32,12 +32,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md rounded-3xl border border-slate-800/70 bg-slate-950/35 p-7 shadow-card">
+    <div className="mx-auto max-w-md rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 sm:p-7 shadow-card">
       <div className="inline-flex items-center gap-2 rounded-full border border-brand-400/25 bg-brand-400/10 px-3 py-1 text-xs text-brand-100">
         <span className="h-1.5 w-1.5 rounded-full bg-brand-400" />
         Secure sign-in
       </div>
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">Login</h1>
+      <h1 className="mt-4 text-xl sm:text-2xl font-semibold tracking-tight">Login</h1>
       <p className="mt-1 text-sm text-slate-300">
         New here?{" "}
         <Link href="/register" className="text-brand-200 hover:text-brand-100">
@@ -47,24 +47,27 @@ export default function LoginPage() {
 
       <form onSubmit={onSubmit} className="mt-5 space-y-3">
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Email</div>
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Email</div>
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
             required
-            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-400/40 focus:outline-none"
+            className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-400/40 focus:outline-none touch-manipulation"
+            inputMode="email"
+            autoComplete="email"
           />
         </label>
 
         <label className="block">
-          <div className="text-xs font-medium text-slate-300">Password</div>
+          <div className="text-xs font-medium text-slate-300 mb-1.5">Password</div>
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type="password"
             required
-            className="mt-1 w-full rounded-xl border border-slate-800 bg-black/30 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-400/40 focus:outline-none"
+            className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-400/40 focus:outline-none touch-manipulation"
+            autoComplete="current-password"
           />
         </label>
 
@@ -72,7 +75,7 @@ export default function LoginPage() {
 
         <button
           disabled={loading}
-          className="w-full rounded-xl bg-brand-400 px-4 py-2.5 text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60"
+          className="w-full rounded-xl bg-brand-400 px-4 py-3.5 sm:py-2.5 text-base sm:text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60 touch-manipulation min-h-[48px] sm:min-h-0"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>

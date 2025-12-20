@@ -130,7 +130,7 @@ export function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-slate-200 hover:border-brand-400/30 hover:bg-slate-900/40 hover:text-white"
+        className="relative rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-slate-200 hover:border-brand-400/30 hover:bg-slate-900/40 hover:text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
         aria-label="Notifications"
       >
         <span className="text-lg">🔔</span>
@@ -142,7 +142,7 @@ export function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-96 rounded-2xl border border-slate-800 bg-slate-950 shadow-xl">
+        <div className="absolute right-0 top-full z-50 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-96 rounded-2xl border border-slate-800 bg-slate-950 shadow-xl">
           <div className="border-b border-slate-800 p-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold">Notifications</h3>

@@ -21,6 +21,39 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Touch optimization */
+button,
+a,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select {
+  touch-action: manipulation;
+}
+
+/* Minimum touch target size for mobile */
+@media (max-width: 768px) {
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Ensure inputs are easily tappable */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="datetime-local"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
 ::selection {
   background: rgba(255, 191, 31, 0.25);
 }

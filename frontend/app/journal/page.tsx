@@ -48,11 +48,11 @@ export default function JournalPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Journal</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold">Journal</h1>
         <button
           type="button"
           onClick={() => exportJournalCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
-          className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900"
+          className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 sm:py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
         >
           Export CSV
         </button>
@@ -66,34 +66,38 @@ export default function JournalPage() {
         <div className="lg:col-span-1">
           <TradeJournalForm trades={trades} onCreated={reload} />
 
-          <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+          <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/30 p-4 sm:p-5">
             <div className="text-sm font-semibold">Filters</div>
             <div className="mt-4 grid gap-3">
               <label className="block">
-                <div className="text-xs font-medium text-slate-300">Strategy contains</div>
+                <div className="text-xs font-medium text-slate-300 mb-1.5">Strategy contains</div>
                 <input
                   value={strategyFilter}
                   onChange={(e) => setStrategyFilter(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base sm:text-sm touch-manipulation"
                   placeholder="Breakout"
+                  inputMode="text"
                 />
               </label>
               <label className="block">
-                <div className="text-xs font-medium text-slate-300">Emotion contains</div>
+                <div className="text-xs font-medium text-slate-300 mb-1.5">Emotion contains</div>
                 <input
                   value={emotionFilter}
                   onChange={(e) => setEmotionFilter(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base sm:text-sm touch-manipulation"
                   placeholder="FOMO"
+                  inputMode="text"
                 />
               </label>
               <label className="block">
-                <div className="text-xs font-medium text-slate-300">Trade symbol contains</div>
+                <div className="text-xs font-medium text-slate-300 mb-1.5">Trade symbol contains</div>
                 <input
                   value={symbolFilter}
                   onChange={(e) => setSymbolFilter(e.target.value.toUpperCase())}
-                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-base sm:text-sm touch-manipulation"
                   placeholder="RELIANCE"
+                  inputMode="text"
+                  autoCapitalize="characters"
                 />
               </label>
               <button
@@ -103,7 +107,7 @@ export default function JournalPage() {
                   setEmotionFilter("");
                   setSymbolFilter("");
                 }}
-                className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm hover:bg-slate-900"
+                className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 sm:py-1.5 text-base sm:text-sm hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
               >
                 Clear filters
               </button>
