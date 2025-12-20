@@ -321,24 +321,26 @@ export default function AnalysisPage() {
                     <Bar dataKey="losses" stackId="a" fill="#ef4444" name="Losses" />
                   </BarChart>
                 </ResponsiveContainer>
-                <div className="mt-4 grid gap-2 text-sm md:grid-cols-4">
-                  <div>
-                    <div className="text-xs text-slate-400">Total Wins</div>
-                    <div className="font-medium text-green-400">{distribution.summary.total_wins}</div>
+                {distribution.summary ? (
+                  <div className="mt-4 grid gap-2 text-sm md:grid-cols-4">
+                    <div>
+                      <div className="text-xs text-slate-400">Total Wins</div>
+                      <div className="font-medium text-green-400">{distribution.summary.total_wins}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-slate-400">Total Losses</div>
+                      <div className="font-medium text-red-400">{distribution.summary.total_losses}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-slate-400">Avg Win</div>
+                      <div className="font-medium text-green-400">{formatCurrency(distribution.summary.avg_win)}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-slate-400">Avg Loss</div>
+                      <div className="font-medium text-red-400">{formatCurrency(distribution.summary.avg_loss)}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-slate-400">Total Losses</div>
-                    <div className="font-medium text-red-400">{distribution.summary.total_losses}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400">Avg Win</div>
-                    <div className="font-medium text-green-400">{formatCurrency(distribution.summary.avg_win)}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400">Avg Loss</div>
-                    <div className="font-medium text-red-400">{formatCurrency(distribution.summary.avg_loss)}</div>
-                  </div>
-                </div>
+                ) : null}
               </div>
             </ChartCard>
           </div>

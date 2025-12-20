@@ -236,9 +236,15 @@ def calculate_win_loss_distribution(trades: List[TradeRow]) -> Dict[str, Any]:
     all_pnls = wins + losses
     if not all_pnls:
         return {
-            "wins": [],
-            "losses": [],
-            "bins": [],
+            "distribution": [],
+            "summary": {
+                "total_wins": 0,
+                "total_losses": 0,
+                "avg_win": 0.0,
+                "avg_loss": 0.0,
+                "max_win": 0.0,
+                "max_loss": 0.0,
+            },
         }
     
     min_pnl = min(all_pnls)
