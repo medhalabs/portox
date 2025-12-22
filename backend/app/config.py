@@ -16,6 +16,11 @@ class Settings(BaseSettings):
 
     env: str = "dev"
 
+    # Base URL for the application (used for self-ping keep-alive)
+    # In production, set this to your Render URL: https://your-app.onrender.com
+    # Defaults to localhost for development
+    base_url: str = "http://localhost:8000"
+
     # PostgreSQL connection URL
     # Format: postgresql://user:password@host:port/database
     postgresql_url: str | None = None

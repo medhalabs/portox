@@ -95,9 +95,10 @@ def _startup() -> None:
 
 
 def _start_scheduler() -> None:
-    """Start the background scheduler for notifications."""
+    """Start the background scheduler for notifications and keep-alive."""
     from apscheduler.schedulers.background import BackgroundScheduler
     from apscheduler.triggers.cron import CronTrigger
+    from apscheduler.triggers.interval import IntervalTrigger
     from app.services.notification_service import (
         send_daily_summaries,
         send_journal_reminders,
@@ -105,8 +106,32 @@ def _start_scheduler() -> None:
         check_position_alerts,
     )
     from app.db.postgresql import fetch_all
+    import httpx
     
     scheduler = BackgroundScheduler()
+    
+    # Self-ping to keep the service alive (every 5 minutes)
+    def self_ping():
+        """Ping the health endpoint to keep the service alive."""
+        base_url = settings.base_url
+        health_url = f"{base_url.rstrip('/')}/health"
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                response = client.get(health_url)
+                if response.status_code == 200:
+                    print(f"✓ Self-ping successful: {health_url}")
+                else:
+                    print(f"⚠ Self-ping returned status {response.status_code}: {health_url}")
+        except Exception as e:
+            # Silently fail - don't spam logs if service is down
+            print(f"⚠ Self-ping failed (this is normal during startup): {e}")
+    
+    scheduler.add_job(
+        self_ping,
+        trigger=IntervalTrigger(minutes=5),
+        id="self_ping",
+        replace_existing=True,
+    )
     
     # Schedule daily summaries at a default time (will be user-configurable per user's preference)
     # For now, run at 8 PM daily
@@ -143,6 +168,7 @@ def _start_scheduler() -> None:
     
     scheduler.start()
     print("Notification scheduler started")
+    print("Self-ping scheduler started (pings every 5 minutes)")
 
 
 @app.get("/")
