@@ -150,6 +150,12 @@ def root() -> dict:
     return {"name": "portik", "vendor": VENDOR, "disclaimer": DISCLAIMER, "version": "0.1.0"}
 
 
+@app.get("/health")
+def health_check() -> dict:
+    """Health check endpoint for keeping the service alive and monitoring."""
+    return {"status": "ok", "service": "portik", "version": "0.1.0"}
+
+
 app.include_router(auth_router)
 app.include_router(trades_router)
 app.include_router(journal_router)
