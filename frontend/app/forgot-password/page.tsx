@@ -5,27 +5,31 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { apiPost } from "@/lib/api";
-import { setToken } from "@/lib/auth";
 
-type TokenResponse = { access_token: string; token_type: "bearer" };
-
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [resetToken, setResetToken] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
+    setResetToken(null);
     setLoading(true);
     try {
-      const token = await apiPost<TokenResponse>("/auth/login", { email, password });
-      setToken(token.access_token);
-      router.push("/dashboard");
+      const response = await apiPost<{ message: string; token?: string; reset_url?: string }>("/auth/forgot-password", { email });
+      setSuccess(response.message);
+      
+      // In development, show the token if provided
+      if (response.token) {
+        setResetToken(response.token);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : "Failed to request password reset");
     } finally {
       setLoading(false);
     }
@@ -35,19 +39,11 @@ export default function LoginPage() {
     <div className="mx-auto max-w-md rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-950/35 p-5 sm:p-7 shadow-card">
       <div className="inline-flex items-center gap-2 rounded-full border border-brand-400/25 bg-brand-400/10 px-3 py-1 text-xs text-brand-100">
         <span className="h-1.5 w-1.5 rounded-full bg-brand-400" />
-        Secure sign-in
+        Password Reset
       </div>
-      <h1 className="mt-4 text-xl sm:text-2xl font-semibold tracking-tight">Login</h1>
+      <h1 className="mt-4 text-xl sm:text-2xl font-semibold tracking-tight">Forgot Password</h1>
       <p className="mt-1 text-sm text-slate-300">
-        New here?{" "}
-        <Link href="/register" className="text-brand-200 hover:text-brand-100">
-          Create an account
-        </Link>
-      </p>
-      <p className="mt-2 text-sm text-slate-300">
-        <Link href="/forgot-password" className="text-brand-200 hover:text-brand-100">
-          Forgot password?
-        </Link>
+        Enter your email address and we'll send you a link to reset your password.
       </p>
 
       <form onSubmit={onSubmit} className="mt-5 space-y-3">
@@ -61,32 +57,40 @@ export default function LoginPage() {
             className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-400/40 focus:outline-none touch-manipulation"
             inputMode="email"
             autoComplete="email"
-          />
-        </label>
-
-        <label className="block">
-          <div className="text-xs font-medium text-slate-300 mb-1.5">Password</div>
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            required
-            className="w-full rounded-xl border border-slate-800 bg-black/30 px-4 py-3 text-base sm:text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-400/40 focus:outline-none touch-manipulation"
-            autoComplete="current-password"
+            placeholder="your@email.com"
           />
         </label>
 
         {error ? <div className="rounded-lg border border-rose-900 bg-rose-950/40 p-2 text-xs">{error}</div> : null}
+        {success ? <div className="rounded-lg border border-emerald-900 bg-emerald-950/40 p-2 text-xs">{success}</div> : null}
+        
+        {resetToken && (
+          <div className="rounded-lg border border-blue-900 bg-blue-950/40 p-3 text-xs space-y-2">
+            <div className="font-medium text-blue-200">Development Mode: Reset Token</div>
+            <div className="text-slate-300 break-all">{resetToken}</div>
+            <Link
+              href={`/reset-password?token=${resetToken}`}
+              className="inline-block mt-2 text-blue-200 hover:text-blue-100 underline"
+            >
+              Click here to reset your password
+            </Link>
+          </div>
+        )}
 
         <button
           disabled={loading}
           className="w-full rounded-xl bg-brand-400 px-4 py-3.5 sm:py-2.5 text-base sm:text-sm font-semibold text-black shadow-glow hover:bg-brand-300 disabled:opacity-60 touch-manipulation min-h-[48px] sm:min-h-0"
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? "Sending..." : "Send Reset Link"}
         </button>
       </form>
+
+      <div className="mt-4 text-center">
+        <Link href="/login" className="text-sm text-brand-200 hover:text-brand-100">
+          Back to login
+        </Link>
+      </div>
     </div>
   );
 }
-
 

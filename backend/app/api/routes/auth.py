@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from secrets import token_urlsafe
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -10,7 +11,7 @@ from app.auth.dependencies import get_current_user
 from app.auth.jwt import create_access_token
 from app.db.postgresql import execute, fetch_all, fetch_one
 from app.models.user import LoginRequest, RegisterRequest, TokenResponse, UserPublic
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -23,6 +24,15 @@ class ChangePasswordRequest(BaseModel):
 
 class DeleteAccountRequest(BaseModel):
     password: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(min_length=8, max_length=72)
 
 
 @router.post("/register", response_model=UserPublic)
@@ -117,6 +127,97 @@ def delete_account(
     execute("DELETE FROM users WHERE id = ?", [user_id])
 
     return {"message": "Account deleted successfully"}
+
+
+@router.post("/forgot-password")
+def forgot_password(payload: ForgotPasswordRequest) -> dict:
+    """Request a password reset. Generates a token and stores it in the database."""
+    user = fetch_one("SELECT id, email FROM users WHERE lower(email) = lower(?)", [payload.email])
+    
+    # Always return success to prevent email enumeration
+    if not user:
+        return {"message": "If an account with that email exists, a password reset link has been sent."}
+    
+    # Generate a secure token
+    reset_token = token_urlsafe(32)
+    token_id = str(uuid4())
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)  # Token expires in 1 hour
+    
+    # Store the token
+    execute(
+        "INSERT INTO password_reset_tokens (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)",
+        [token_id, str(user["id"]), reset_token, expires_at],
+    )
+    
+    # TODO: In production, send email with reset link
+    # For now, we'll return the token in development mode
+    # In production, this should be removed and email should be sent instead
+    import os
+    if os.getenv("ENV", "dev") != "prod":
+        # Development: return token in response (for testing)
+        return {
+            "message": "Password reset token generated. In production, this would be sent via email.",
+            "token": reset_token,  # Remove this in production
+            "reset_url": f"/reset-password?token={reset_token}",
+        }
+    
+    return {"message": "If an account with that email exists, a password reset link has been sent."}
+
+
+@router.post("/reset-password")
+def reset_password(payload: ResetPasswordRequest) -> dict:
+    """Reset password using a valid reset token."""
+    # Find the token
+    token_data = fetch_one(
+        """
+        SELECT prt.id, prt.user_id, prt.expires_at, prt.used, u.email
+        FROM password_reset_tokens prt
+        JOIN users u ON u.id = prt.user_id
+        WHERE prt.token = ? AND prt.used = FALSE
+        """,
+        [payload.token],
+    )
+    
+    if not token_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token",
+        )
+    
+    # Check if token is expired
+    expires_at = token_data["expires_at"]
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+    elif isinstance(expires_at, datetime):
+        # Ensure timezone-aware
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+    
+    if datetime.now(timezone.utc) > expires_at:
+        # Mark as used even though expired
+        execute("UPDATE password_reset_tokens SET used = TRUE WHERE id = ?", [token_data["id"]])
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token",
+        )
+    
+    # Validate password length
+    password_bytes = payload.new_password.encode("utf-8")
+    if len(password_bytes) > 72:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password is too long. Maximum 72 bytes allowed.",
+        )
+    
+    # Update password
+    user_id = str(token_data["user_id"])
+    new_password_hash = pwd_context.hash(payload.new_password)
+    execute("UPDATE users SET password_hash = ? WHERE id = ?", [new_password_hash, user_id])
+    
+    # Mark token as used
+    execute("UPDATE password_reset_tokens SET used = TRUE WHERE id = ?", [token_data["id"]])
+    
+    return {"message": "Password reset successfully"}
 
 
 @router.get("/export-data")
