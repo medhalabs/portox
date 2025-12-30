@@ -16,6 +16,17 @@ CREATE TABLE IF NOT EXISTS trades (
   fees DOUBLE PRECISION DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS mutual_funds (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  scheme_code VARCHAR NOT NULL,  -- MFapi.in scheme code
+  scheme_name VARCHAR NOT NULL,
+  units DOUBLE PRECISION NOT NULL,  -- Number of units purchased
+  nav DOUBLE PRECISION NOT NULL,    -- NAV at purchase time
+  investment_date TIMESTAMP NOT NULL,
+  fees DOUBLE PRECISION DEFAULT 0   -- Entry load, exit load, etc.
+);
+
 CREATE TABLE IF NOT EXISTS journal_entries (
   id UUID PRIMARY KEY,
   trade_id UUID NOT NULL REFERENCES trades(id) ON DELETE CASCADE,
@@ -84,6 +95,9 @@ CREATE TABLE IF NOT EXISTS notifications (
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_trades_user_id ON trades(user_id);
 CREATE INDEX IF NOT EXISTS idx_trades_trade_time ON trades(trade_time);
+CREATE INDEX IF NOT EXISTS idx_mutual_funds_user_id ON mutual_funds(user_id);
+CREATE INDEX IF NOT EXISTS idx_mutual_funds_investment_date ON mutual_funds(investment_date);
+CREATE INDEX IF NOT EXISTS idx_mutual_funds_scheme_code ON mutual_funds(scheme_code);
 CREATE INDEX IF NOT EXISTS idx_journal_entries_trade_id ON journal_entries(trade_id);
 CREATE INDEX IF NOT EXISTS idx_journal_attachments_journal_entry_id ON journal_attachments(journal_entry_id);
 CREATE INDEX IF NOT EXISTS idx_broker_connections_user_id ON broker_connections(user_id);

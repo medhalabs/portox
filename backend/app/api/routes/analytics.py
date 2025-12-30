@@ -19,6 +19,8 @@ from app.services.export_service import export_analytics_csv, export_realized_ma
 from app.services.pdf_service import generate_performance_report
 from app.services.pnl_service import TradeRow, compute_fifo
 from app.services.tax_service import calculate_tax_classification, get_tax_year_summary
+from app.services.mf_pnl_service import MutualFundRow
+from app.services.mf_analytics_service import overview_from_mutual_funds, performance_from_mutual_funds
 from app.models.tax import TaxReportRequest
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
@@ -37,10 +39,28 @@ def _load_trades(user_id: str) -> list[TradeRow]:
     return [TradeRow(**r) for r in rows]  # type: ignore[arg-type]
 
 
+def _load_mutual_funds(user_id: str) -> list[MutualFundRow]:
+    rows = fetch_all(
+        """
+        SELECT id, user_id, scheme_code, scheme_name, units, nav, investment_date, fees
+        FROM mutual_funds
+        WHERE user_id = ?
+        ORDER BY investment_date ASC
+        """.strip(),
+        [user_id],
+    )
+    return [MutualFundRow(**r) for r in rows]  # type: ignore[arg-type]
+
+
 @router.get("/overview")
-def overview(user: dict = Depends(get_current_user)) -> dict:
-    trades = _load_trades(str(user["id"]))
-    return overview_from_trades(trades)
+async def overview(user: dict = Depends(get_current_user), type: str = "trades") -> dict:
+    """Get analytics overview. type can be 'trades' or 'mutual_funds'"""
+    if type == "mutual_funds":
+        investments = _load_mutual_funds(str(user["id"]))
+        return await overview_from_mutual_funds(investments)
+    else:
+        trades = _load_trades(str(user["id"]))
+        return overview_from_trades(trades)
 
 
 @router.post("/overview")
@@ -79,10 +99,15 @@ def _load_journal_tags(user_id: str) -> dict:
 
 
 @router.get("/performance")
-def performance(user: dict = Depends(get_current_user)) -> dict:
-    trades = _load_trades(str(user["id"]))
-    tags = _load_journal_tags(str(user["id"]))
-    return performance_from_trades(trades, journal_by_trade_id=tags)
+async def performance(user: dict = Depends(get_current_user), type: str = "trades") -> dict:
+    """Get performance data. type can be 'trades' or 'mutual_funds'"""
+    if type == "mutual_funds":
+        investments = _load_mutual_funds(str(user["id"]))
+        return await performance_from_mutual_funds(investments)
+    else:
+        trades = _load_trades(str(user["id"]))
+        tags = _load_journal_tags(str(user["id"]))
+        return performance_from_trades(trades, journal_by_trade_id=tags)
 
 
 @router.get("/export/csv")

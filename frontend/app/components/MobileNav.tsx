@@ -75,6 +75,7 @@ export function MobileNav({ onLogout }: { onLogout: () => void }) {
           <MobileNavLink href="/insights" onClose={() => setIsOpen(false)}>Insights</MobileNavLink>
           <MobileNavLink href="/analysis" onClose={() => setIsOpen(false)}>Analysis</MobileNavLink>
           <MobileNavLink href="/trades" onClose={() => setIsOpen(false)}>Trades</MobileNavLink>
+          <MobileNavLink href="/mutual-funds" onClose={() => setIsOpen(false)}>Mutual Funds</MobileNavLink>
           <MobileNavLink href="/journal" onClose={() => setIsOpen(false)}>Journal</MobileNavLink>
           <MobileNavLink href="/tax" onClose={() => setIsOpen(false)}>Tax</MobileNavLink>
           <MobileNavLink href="/settings" onClose={() => setIsOpen(false)}>Settings</MobileNavLink>

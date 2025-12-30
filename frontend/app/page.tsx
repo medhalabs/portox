@@ -22,8 +22,8 @@ export default function LandingPage() {
           </h1>
 
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-300">
-            portik is a portfolio + trade journal SaaS for active traders who want clarity: track executions, capture
-            context, and measure what works with clean, server‑side analytics.
+            portik is a comprehensive portfolio tracker for traders and investors: track stock trades, manage mutual fund investments, 
+            capture context, and measure performance with clean, server‑side analytics.
           </p>
 
           <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-green-400/25 bg-green-400/10 px-3 py-1 text-xs text-green-100">
@@ -49,9 +49,10 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-3 md:grid-cols-3">
+          <div className="mt-8 grid gap-3 md:grid-cols-4">
             <MiniStat label="Server-side analytics" value="No client-side P&L math" />
             <MiniStat label="Import options" value="CSV + broker sync (read-only)" />
+            <MiniStat label="Multi-asset support" value="Stocks + Mutual Funds" />
             <MiniStat label="Designed for speed" value="Fast review, clean UI" />
           </div>
         </div>
@@ -59,9 +60,14 @@ export default function LandingPage() {
 
       <section className="grid gap-4 md:grid-cols-2">
         <FeatureCard
-          title="Trade capture that doesn’t fight you"
+          title="Trade capture that doesn't fight you"
           desc="Add trades in seconds, edit mistakes, filter by symbol/side/date, and import in bulk."
           bullets={["Trade CRUD + editing", "CSV import with duplicate detection", "Broker sync (read-only)"]}
+        />
+        <FeatureCard
+          title="Mutual fund tracking with live NAV"
+          desc="Track your mutual fund investments with automatic NAV updates from MFapi.in. Search schemes, fetch historical NAVs, and monitor performance."
+          bullets={["Search & select schemes", "Automatic NAV updates", "Historical NAV lookup", "Investment performance tracking"]}
         />
         <FeatureCard
           title="A journal that connects context to execution"
@@ -70,8 +76,13 @@ export default function LandingPage() {
         />
         <FeatureCard
           title="Performance insights you can act on"
-          desc="Understand outcomes across time, strategies, and symbols—without turning the product into “signals.”"
-          bullets={["Daily & weekly realized P&L", "Equity curve + streaks", "Breakdowns by symbol/strategy/emotion"]}
+          desc="Understand outcomes across time, strategies, and symbols—without turning the product into signals."
+          bullets={["Daily & weekly realized P&L", "Equity curve + streaks", "Breakdowns by symbol/strategy/emotion", "Mutual fund performance metrics"]}
+        />
+        <FeatureCard
+          title="Unified portfolio dashboard"
+          desc="View all your investments in one place. Switch between trades and mutual funds with dedicated analytics for each asset type."
+          bullets={["Combined portfolio view", "Separate analytics for trades & MFs", "Real-time NAV updates", "Top performing schemes"]}
         />
         <FeatureCard
           title="Unrealized P&L: transparent mark logic"
@@ -82,17 +93,18 @@ export default function LandingPage() {
 
       <section className="rounded-3xl border border-slate-800/70 bg-slate-950/30 p-7 shadow-card">
         <div className="text-sm font-semibold">How it works</div>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="mt-4 grid gap-4 md:grid-cols-4">
           <Step n="01" title="Import or add trades" desc="Bring in executions via CSV or broker sync. Edit anything." />
-          <Step n="02" title="Journal the context" desc="Tag strategy/emotion and write notes while it’s fresh." />
-          <Step n="03" title="Review the outcomes" desc="Track realized/unrealized P&L and performance breakdowns." />
+          <Step n="02" title="Track mutual funds" desc="Search schemes, add investments, and get automatic NAV updates." />
+          <Step n="03" title="Journal the context" desc="Tag strategy/emotion and write notes while it's fresh." />
+          <Step n="04" title="Review the outcomes" desc="Track realized/unrealized P&L and performance breakdowns." />
         </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
         <ValueCard
           title="No advice, no signals"
-          desc="We don’t predict markets. This is performance analytics and journaling."
+          desc="We don't predict markets. This is performance analytics and journaling."
         />
         <ValueCard
           title="Secure by design"
@@ -102,6 +114,31 @@ export default function LandingPage() {
           title="Built to extend"
           desc="Modular FastAPI backend and clean UI. Postgres and more brokers can be added later."
         />
+      </section>
+
+      <section className="relative overflow-hidden rounded-3xl border border-blue-800/50 bg-gradient-to-br from-blue-950/40 to-slate-950/40 p-8 shadow-card">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_250px_at_50%_50%,rgba(56,189,248,0.15),transparent_70%)]" />
+        <div className="relative">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-400/10 px-3 py-1 text-xs text-blue-200">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+            Coming Soon
+          </div>
+          <h2 className="mt-4 text-2xl font-semibold tracking-tight md:text-3xl">
+            <span className="bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 bg-clip-text text-transparent">
+              Stock Analyzer
+            </span>
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300">
+            Advanced stock analysis tools with technical indicators, screening capabilities, and comprehensive market insights. 
+            Analyze stocks, compare performance, and make informed investment decisions.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="rounded-lg border border-blue-800/50 bg-blue-950/30 px-3 py-1 text-xs text-blue-200">Technical Indicators</span>
+            <span className="rounded-lg border border-blue-800/50 bg-blue-950/30 px-3 py-1 text-xs text-blue-200">Stock Screening</span>
+            <span className="rounded-lg border border-blue-800/50 bg-blue-950/30 px-3 py-1 text-xs text-blue-200">Performance Comparison</span>
+            <span className="rounded-lg border border-blue-800/50 bg-blue-950/30 px-3 py-1 text-xs text-blue-200">Market Insights</span>
+          </div>
+        </div>
       </section>
     </div>
   );
