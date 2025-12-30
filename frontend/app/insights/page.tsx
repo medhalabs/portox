@@ -8,6 +8,7 @@ import { getToken } from "@/lib/auth";
 import { exportAnalyticsCSV, exportRealizedMatchesCSV } from "@/lib/export";
 import type { PerformanceResponse } from "@/types/analytics";
 import { formatCurrency, formatPercent } from "@/utils/formatters";
+import { ViewToggle } from "@/app/components/ViewToggle";
 import {
   CartesianGrid,
   Line,
@@ -20,8 +21,11 @@ import {
   BarChart
 } from "recharts";
 
+type ViewType = "trades" | "mutual_funds";
+
 export default function InsightsPage() {
   const router = useRouter();
+  const [viewType, setViewType] = useState<ViewType>("trades");
   const [data, setData] = useState<PerformanceResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +40,7 @@ export default function InsightsPage() {
       setLoading(true);
       setError(null);
       try {
-        const d = await apiFetch<PerformanceResponse>("/analytics/performance");
+        const d = await apiFetch<PerformanceResponse>(`/analytics/performance?type=${viewType}`);
         if (!cancelled) setData(d);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load insights");
@@ -48,16 +52,21 @@ export default function InsightsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [viewType]);
 
   const dailyChart = useMemo(() => {
-    const pts = data?.series.daily_realized_pnl || [];
-    return pts.map((p) => ({ ...p, short: p.date.slice(5) }));
-  }, [data]);
+    if (viewType === "mutual_funds") {
+      const pts = data?.series.daily_investment || [];
+      return pts.map((p: any) => ({ ...p, short: p.date.slice(5), investment: p.investment }));
+    } else {
+      const pts = data?.series.daily_realized_pnl || [];
+      return pts.map((p: any) => ({ ...p, short: p.date.slice(5) }));
+    }
+  }, [data, viewType]);
 
   const equityChart = useMemo(() => {
     const pts = data?.series.equity_curve || [];
-    return pts.map((p) => ({ ...p, short: p.date.slice(5) }));
+    return pts.map((p: any) => ({ ...p, short: p.date.slice(5) }));
   }, [data]);
 
   const weeklyChart = useMemo(() => data?.series.weekly_realized_pnl || [], [data]);
@@ -66,21 +75,26 @@ export default function InsightsPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl sm:text-2xl font-semibold">Insights</h1>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => exportAnalyticsCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
-            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 sm:py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
-          >
-            Export Analytics CSV
-          </button>
-          <button
-            type="button"
-            onClick={() => exportRealizedMatchesCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
-            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 sm:py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
-          >
-            Export Matches CSV
-          </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <ViewToggle value={viewType} onChange={setViewType} />
+          {viewType === "trades" && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => exportAnalyticsCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
+                className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 sm:py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
+              >
+                Export Analytics CSV
+              </button>
+              <button
+                type="button"
+                onClick={() => exportRealizedMatchesCSV().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
+                className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 sm:py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
+              >
+                Export Matches CSV
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -91,39 +105,64 @@ export default function InsightsPage() {
 
       {data ? (
         <div className="grid gap-4 lg:grid-cols-3">
-          <Card title="Best day">
-            <div className="text-sm text-slate-300">
-              {data.stats.best_day ? (
-                <>
-                  <div className="text-xs text-slate-400">{data.stats.best_day.date}</div>
-                  <div className="mt-1 text-lg font-semibold">{formatCurrency(data.stats.best_day.pnl)}</div>
-                </>
-              ) : (
-                "—"
-              )}
-            </div>
-          </Card>
-          <Card title="Worst day">
-            <div className="text-sm text-slate-300">
-              {data.stats.worst_day ? (
-                <>
-                  <div className="text-xs text-slate-400">{data.stats.worst_day.date}</div>
-                  <div className="mt-1 text-lg font-semibold">{formatCurrency(data.stats.worst_day.pnl)}</div>
-                </>
-              ) : (
-                "—"
-              )}
-            </div>
-          </Card>
-          <Card title="Streaks (matches)">
-            <div className="grid gap-2 text-sm">
-              <Row label="Max win streak" value={`${data.stats.max_win_streak}`} />
-              <Row label="Max loss streak" value={`${data.stats.max_loss_streak}`} />
-            </div>
-          </Card>
+          {viewType === "trades" ? (
+            <>
+              <Card title="Best day">
+                <div className="text-sm text-slate-300">
+                  {data.stats.best_day ? (
+                    <>
+                      <div className="text-xs text-slate-400">{data.stats.best_day.date}</div>
+                      <div className="mt-1 text-lg font-semibold">{formatCurrency(data.stats.best_day.pnl)}</div>
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </div>
+              </Card>
+              <Card title="Worst day">
+                <div className="text-sm text-slate-300">
+                  {data.stats.worst_day ? (
+                    <>
+                      <div className="text-xs text-slate-400">{data.stats.worst_day.date}</div>
+                      <div className="mt-1 text-lg font-semibold">{formatCurrency(data.stats.worst_day.pnl)}</div>
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </div>
+              </Card>
+              <Card title="Streaks (matches)">
+                <div className="grid gap-2 text-sm">
+                  <Row label="Max win streak" value={`${data.stats.max_win_streak}`} />
+                  <Row label="Max loss streak" value={`${data.stats.max_loss_streak}`} />
+                </div>
+              </Card>
+            </>
+          ) : (
+            <>
+              <Card title="Total Investment">
+                <div className="text-sm text-slate-300">
+                  <div className="mt-1 text-lg font-semibold">{formatCurrency(data.stats.total_investment || 0)}</div>
+                </div>
+              </Card>
+              <Card title="Current Value">
+                <div className="text-sm text-slate-300">
+                  <div className="mt-1 text-lg font-semibold">{formatCurrency(data.stats.current_value || 0)}</div>
+                </div>
+              </Card>
+              <Card title="Total Return">
+                <div className="text-sm text-slate-300">
+                  <div className="mt-1 text-lg font-semibold">{formatCurrency(data.stats.total_return || 0)}</div>
+                  <div className="text-xs text-slate-400 mt-1">
+                    {formatPercent((data.stats.total_return_percent || 0) / 100)}
+                  </div>
+                </div>
+              </Card>
+            </>
+          )}
 
           <div className="lg:col-span-2">
-            <ChartCard title="Daily realized P&L">
+            <ChartCard title={viewType === "mutual_funds" ? "Daily Investment" : "Daily realized P&L"}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dailyChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -134,31 +173,39 @@ export default function InsightsPage() {
                     formatter={(value) => formatCurrency(Number(value))}
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.date || label}
                   />
-                  <Line type="monotone" dataKey="pnl" stroke="#ffbf1f" strokeWidth={2} dot={false} />
+                  <Line 
+                    type="monotone" 
+                    dataKey={viewType === "mutual_funds" ? "investment" : "pnl"} 
+                    stroke="#ffbf1f" 
+                    strokeWidth={2} 
+                    dot={false} 
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </ChartCard>
           </div>
 
-          <div className="lg:col-span-1">
-            <ChartCard title="Weekly realized P&L">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                  <XAxis dataKey="week" stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
-                  <YAxis stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0", fontSize: "12px" }}
-                    formatter={(value) => formatCurrency(Number(value))}
-                  />
-                  <Bar dataKey="pnl" fill="#22c55e" />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartCard>
-          </div>
+          {viewType === "trades" && (
+            <div className="lg:col-span-1">
+              <ChartCard title="Weekly realized P&L">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={weeklyChart}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                    <XAxis dataKey="week" stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
+                    <YAxis stroke="#94a3b8" fontSize={11} tick={{ fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ background: "#06080f", border: "1px solid rgba(255,191,31,0.22)", color: "#e2e8f0", fontSize: "12px" }}
+                      formatter={(value) => formatCurrency(Number(value))}
+                    />
+                    <Bar dataKey="pnl" fill="#22c55e" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            </div>
+          )}
 
           <div className="lg:col-span-3">
-            <ChartCard title="Equity curve (realized)">
+            <ChartCard title={viewType === "mutual_funds" ? "Investment Value Over Time" : "Equity curve (realized)"}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={equityChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -176,11 +223,17 @@ export default function InsightsPage() {
           </div>
 
           <div className="lg:col-span-3">
-            <div className="grid gap-4 lg:grid-cols-3">
-              <BreakdownTable title="By symbol" rows={data.breakdowns.by_symbol} />
-              <BreakdownTable title="By strategy" rows={data.breakdowns.by_strategy} />
-              <BreakdownTable title="By emotion" rows={data.breakdowns.by_emotion} />
-            </div>
+            {viewType === "trades" ? (
+              <div className="grid gap-4 lg:grid-cols-3">
+                <BreakdownTable title="By symbol" rows={data.breakdowns.by_symbol || []} />
+                <BreakdownTable title="By strategy" rows={data.breakdowns.by_strategy || []} />
+                <BreakdownTable title="By emotion" rows={data.breakdowns.by_emotion || []} />
+              </div>
+            ) : (
+              <div className="grid gap-4 lg:grid-cols-1">
+                <BreakdownTableMF title="By Scheme" rows={data.breakdowns.by_scheme || []} />
+              </div>
+            )}
           </div>
         </div>
       ) : null}
@@ -279,6 +332,88 @@ function BreakdownTable({
         </>
       )}
       <div className="mt-2 text-xs text-slate-400">Top 10 by absolute P&amp;L.</div>
+    </div>
+  );
+}
+
+function BreakdownTableMF({
+  title,
+  rows
+}: {
+  title: string;
+  rows: { key: string; pnl: number; investment: number; current_value: number; return_percent: number }[];
+}) {
+  const displayRows = rows.slice(0, 20);
+  return (
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-950/35 p-4 sm:p-5 shadow-card">
+      <div className="text-sm font-semibold">{title}</div>
+      {displayRows.length === 0 ? (
+        <div className="mt-4 py-3 text-slate-400 text-sm">No data.</div>
+      ) : (
+        <>
+          {/* Mobile card view */}
+          <div className="mt-4 space-y-2 md:hidden">
+            {displayRows.map((r) => (
+              <div key={r.key} className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+                <div className="font-medium text-sm mb-2">{r.key}</div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <div className="text-slate-400">Investment</div>
+                    <div className="font-medium mt-0.5">{formatCurrency(r.investment)}</div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Current Value</div>
+                    <div className="font-medium mt-0.5">{formatCurrency(r.current_value)}</div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Return</div>
+                    <div className={`font-medium mt-0.5 ${r.pnl >= 0 ? "text-green-400" : "text-red-400"}`}>
+                      {formatCurrency(r.pnl)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Return %</div>
+                    <div className={`font-medium mt-0.5 ${r.return_percent >= 0 ? "text-green-400" : "text-red-400"}`}>
+                      {formatPercent(r.return_percent / 100)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table view */}
+          <div className="mt-4 overflow-x-auto hidden md:block">
+            <table className="w-full text-left text-sm">
+              <thead className="text-xs text-slate-400">
+                <tr>
+                  <th className="py-2">Scheme</th>
+                  <th className="py-2">Investment</th>
+                  <th className="py-2">Current Value</th>
+                  <th className="py-2">Return</th>
+                  <th className="py-2">Return %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayRows.map((r) => (
+                  <tr key={r.key} className="border-t border-slate-800">
+                    <td className="py-2 font-medium">{r.key}</td>
+                    <td className="py-2">{formatCurrency(r.investment)}</td>
+                    <td className="py-2">{formatCurrency(r.current_value)}</td>
+                    <td className={`py-2 ${r.pnl >= 0 ? "text-green-400" : "text-red-400"}`}>
+                      {formatCurrency(r.pnl)}
+                    </td>
+                    <td className={`py-2 ${r.return_percent >= 0 ? "text-green-400" : "text-red-400"}`}>
+                      {formatPercent(r.return_percent / 100)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+      <div className="mt-2 text-xs text-slate-400">Top 20 by absolute return.</div>
     </div>
   );
 }

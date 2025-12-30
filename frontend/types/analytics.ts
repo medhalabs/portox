@@ -11,20 +11,33 @@ export type BreakdownRow = {
 
 export type PerformanceResponse = {
   series: {
-    daily_realized_pnl: DailyPnlPoint[];
-    weekly_realized_pnl: WeeklyPnlPoint[];
+    daily_realized_pnl?: DailyPnlPoint[];
+    daily_investment?: { date: string; investment: number }[];
+    weekly_realized_pnl?: WeeklyPnlPoint[];
     equity_curve: EquityPoint[];
   };
   stats: {
-    best_day: { date: string; pnl: number } | null;
-    worst_day: { date: string; pnl: number } | null;
-    max_win_streak: number;
-    max_loss_streak: number;
+    best_day?: { date: string; pnl: number } | null;
+    worst_day?: { date: string; pnl: number } | null;
+    max_win_streak?: number;
+    max_loss_streak?: number;
+    // Mutual funds stats
+    total_investment?: number;
+    current_value?: number;
+    total_return?: number;
+    total_return_percent?: number;
   };
   breakdowns: {
-    by_symbol: BreakdownRow[];
-    by_strategy: BreakdownRow[];
-    by_emotion: BreakdownRow[];
+    by_symbol?: BreakdownRow[];
+    by_strategy?: BreakdownRow[];
+    by_emotion?: BreakdownRow[];
+    by_scheme?: {
+      key: string;
+      pnl: number;
+      investment: number;
+      current_value: number;
+      return_percent: number;
+    }[];
   };
   notes?: Record<string, unknown>;
 };

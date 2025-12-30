@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { formatCurrency, formatPercent } from "@/utils/formatters";
+import { ViewToggle } from "@/app/components/ViewToggle";
 import {
   BarChart,
   Bar,
@@ -18,6 +19,8 @@ import {
   CartesianGrid,
   Cell,
 } from "recharts";
+
+type ViewType = "trades" | "mutual_funds";
 
 type HeatmapData = {
   date: string;
@@ -93,6 +96,7 @@ type WinLossDistribution = {
 
 export default function AnalysisPage() {
   const router = useRouter();
+  const [viewType, setViewType] = useState<ViewType>("trades");
   const [heatmap, setHeatmap] = useState<{ heatmap_data: HeatmapData[] } | null>(null);
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDayData | null>(null);
   const [symbolMatrix, setSymbolMatrix] = useState<SymbolMatrix | null>(null);
@@ -111,19 +115,28 @@ export default function AnalysisPage() {
       setLoading(true);
       setError(null);
       try {
-        const [h, t, s, st, d] = await Promise.all([
-          apiFetch<{ heatmap_data: HeatmapData[] }>("/analytics/trade-heatmap"),
-          apiFetch<TimeOfDayData>("/analytics/time-of-day"),
-          apiFetch<SymbolMatrix>("/analytics/symbol-matrix"),
-          apiFetch<StrategyMatrix>("/analytics/strategy-matrix"),
-          apiFetch<WinLossDistribution>("/analytics/win-loss-distribution"),
-        ]);
-        if (!cancelled) {
-          setHeatmap(h);
-          setTimeOfDay(t);
-          setSymbolMatrix(s);
-          setStrategyMatrix(st);
-          setDistribution(d);
+        if (viewType === "trades") {
+          const [h, t, s, st, d] = await Promise.all([
+            apiFetch<{ heatmap_data: HeatmapData[] }>("/analytics/trade-heatmap"),
+            apiFetch<TimeOfDayData>("/analytics/time-of-day"),
+            apiFetch<SymbolMatrix>("/analytics/symbol-matrix"),
+            apiFetch<StrategyMatrix>("/analytics/strategy-matrix"),
+            apiFetch<WinLossDistribution>("/analytics/win-loss-distribution"),
+          ]);
+          if (!cancelled) {
+            setHeatmap(h);
+            setTimeOfDay(t);
+            setSymbolMatrix(s);
+            setStrategyMatrix(st);
+            setDistribution(d);
+          }
+        } else {
+          // For mutual funds, analysis is limited - clear trade-specific data
+          setHeatmap(null);
+          setTimeOfDay(null);
+          setSymbolMatrix(null);
+          setStrategyMatrix(null);
+          setDistribution(null);
         }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load analysis");
@@ -135,7 +148,7 @@ export default function AnalysisPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [viewType]);
 
   // Generate calendar heatmap data
   const heatmapCalendar = heatmap?.heatmap_data || [];
@@ -155,7 +168,8 @@ export default function AnalysisPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Trade Analysis</h1>
+        <h1 className="text-2xl font-semibold">{viewType === "trades" ? "Trade Analysis" : "Mutual Fund Analysis"}</h1>
+        <ViewToggle value={viewType} onChange={setViewType} />
       </div>
 
       {error ? (
@@ -163,7 +177,14 @@ export default function AnalysisPage() {
       ) : null}
       {loading ? <div className="text-sm text-slate-300">Loading...</div> : null}
 
-      {heatmap && timeOfDay && symbolMatrix && strategyMatrix && distribution && (
+      {viewType === "mutual_funds" ? (
+        <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-5">
+          <div className="text-sm text-slate-400">
+            Mutual fund analysis is available in the Insights page. Trade-specific analysis (heatmaps, time-of-day, etc.) 
+            is not applicable to mutual funds as they don't have entry/exit trades.
+          </div>
+        </div>
+      ) : heatmap && timeOfDay && symbolMatrix && strategyMatrix && distribution && (
         <div className="grid gap-4 lg:grid-cols-2">
           {/* Trade Heatmap */}
           <div className="lg:col-span-2">

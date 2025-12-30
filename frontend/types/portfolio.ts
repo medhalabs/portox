@@ -1,10 +1,15 @@
 export type OpenPosition = {
   symbol: string;
-  side: "LONG" | "SHORT";
+  side?: "LONG" | "SHORT";  // Optional for mutual funds
+  name?: string;  // For mutual funds
   quantity: number;
-  avg_cost: number;
-  mark_price: number;
+  qty?: number;  // Alternative field name
+  avg_cost?: number;  // For trades
+  avg_price?: number;  // For mutual funds
+  mark_price?: number;  // For trades
+  current_price?: number;  // For mutual funds
   unrealized_pnl: number;
+  type?: "trade" | "mutual_fund";  // To distinguish
 };
 
 export type PortfolioSummary = {

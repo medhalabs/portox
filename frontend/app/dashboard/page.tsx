@@ -7,14 +7,20 @@ import { apiFetch } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { exportPerformancePDF } from "@/lib/export";
 import type { AnalyticsOverview, PortfolioSummary } from "@/types/portfolio";
+import { ViewToggle } from "@/app/components/ViewToggle";
 
 import { PortfolioSummaryCard } from "./components/PortfolioSummary";
 import { PnLChart } from "./components/PnLChart";
 import { OpenPositions } from "./components/OpenPositions";
 import { RiskMetrics } from "./components/RiskMetrics";
+import { MFPerformanceMetrics } from "./components/MFPerformanceMetrics";
+import { MFInvestmentChart } from "./components/MFInvestmentChart";
+
+type ViewType = "trades" | "mutual_funds";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [viewType, setViewType] = useState<ViewType>("trades");
   const [summary, setSummary] = useState<PortfolioSummary | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +38,8 @@ export default function DashboardPage() {
       setError(null);
       try {
         const [s, a] = await Promise.all([
-          apiFetch<PortfolioSummary>("/portfolio/summary"),
-          apiFetch<AnalyticsOverview>("/analytics/overview")
+          apiFetch<PortfolioSummary>(`/portfolio/summary?type=${viewType}`),
+          apiFetch<AnalyticsOverview>(`/analytics/overview?type=${viewType}`)
         ]);
         if (!cancelled) {
           setSummary(s);
@@ -49,19 +55,24 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [viewType]);
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl sm:text-2xl font-semibold">Dashboard</h1>
-        <button
-          type="button"
-          onClick={() => exportPerformancePDF().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
-          className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 sm:py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
-        >
-          Export PDF Report
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <ViewToggle value={viewType} onChange={setViewType} />
+          {viewType === "trades" && (
+            <button
+              type="button"
+              onClick={() => exportPerformancePDF().catch((err) => setError(err instanceof Error ? err.message : "Export failed"))}
+              className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 sm:py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-900 touch-manipulation min-h-[44px] sm:min-h-0"
+            >
+              Export PDF Report
+            </button>
+          )}
+        </div>
       </div>
 
       {error ? (
@@ -73,8 +84,17 @@ export default function DashboardPage() {
       {summary && analytics ? (
         <div className="grid gap-4 lg:grid-cols-3">
           <PortfolioSummaryCard summary={summary} />
-          <RiskMetrics analytics={analytics} />
-          <PnLChart analytics={analytics} />
+          {viewType === "trades" ? (
+            <>
+              <RiskMetrics analytics={analytics} />
+              <PnLChart analytics={analytics} />
+            </>
+          ) : (
+            <>
+              <MFPerformanceMetrics analytics={analytics} />
+              <MFInvestmentChart analytics={analytics} />
+            </>
+          )}
           <div className="lg:col-span-3">
             <OpenPositions positions={summary.open_positions} />
           </div>
