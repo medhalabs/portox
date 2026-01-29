@@ -29,7 +29,7 @@ cd frontend
 cp env.example .env.local
 npm install
 npm run dev
-```
+``` 
 
 Frontend will call the backend via `NEXT_PUBLIC_API_BASE_URL` (default: `http://localhost:8000`).
 
